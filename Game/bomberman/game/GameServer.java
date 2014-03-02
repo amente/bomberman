@@ -6,20 +6,19 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.concurrent.ArrayBlockingQueue;
 
-
-
-
 public class GameServer extends Thread {
 	
 	private DatagramSocket recieveSocket;
 	private DatagramPacket packet;	
+	
+		
 	private boolean isStopped;
 	
 	public ArrayBlockingQueue<DatagramPacket> messageQueue; // Thread safe FIFO Queue	
 	
-	public GameServer(int port){			
+	public GameServer(int listenPort,int broadcastPort){			
 		try {
-			recieveSocket = new DatagramSocket(port);			
+			recieveSocket = new DatagramSocket(listenPort);			
 			messageQueue = new ArrayBlockingQueue<DatagramPacket>(Application.QUEUE_CAPACITY);		
 			
 		} catch (SocketException e) {
@@ -28,6 +27,14 @@ public class GameServer extends Thread {
 		}		
 		
 	}	
+	
+	/**
+	 * Send the game status to clients
+	 * @return
+	 */
+	public void sendMessageToClients(byte[] message){		
+		
+	}
 	
 	public boolean listen(){		
 		try {		

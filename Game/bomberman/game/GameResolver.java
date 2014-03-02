@@ -1,50 +1,23 @@
 package bomberman.game;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.UnknownHostException;
 
 import bomberman.game.floor.Floor;
 
 
 public class GameResolver extends Thread{
 	
-	Floor gameFloor;	
+	static Floor gameFloor;	
 	GameServer gameServer;
 	
-	private MulticastSocket broadcastSocket;
-	private InetAddress broadcastGroup; 
 	
-	public GameResolver(GameServer gameServer,int broadcastPort,int xSize,int ySize){
-		try {
-			broadcastSocket = new MulticastSocket(broadcastPort);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}	
+	public GameResolver(GameServer gameServer,int xSize,int ySize){
 		
-		try {
-			broadcastGroup = InetAddress.getByName(Application.BROADCAST_ADDR);
-			
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}			
 		gameFloor = new Floor(xSize,ySize);			
 		this.gameServer = gameServer;
 	}	
 	
-	/**
-	 * Broad cast the game status
-	 * @return
-	 */
-	public void broadCast(){		
-		// TODO: Broadcast the game state to client players
 		
-	}
-	
 	@Override
 	public void run(){
 		

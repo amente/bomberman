@@ -26,8 +26,8 @@ public class Application {
 		int ySize = Integer.parseInt(args[3]);
 		
 		
-		GameServer server = new GameServer(listenPort);
-		GameResolver gameResolver = new GameResolver(server,broadcastPort,xSize,ySize);
+		GameServer server = new GameServer(listenPort,broadcastPort);
+		GameResolver gameResolver = new GameResolver(server,xSize,ySize);
 		
 		server.start();
 		gameResolver.start();
