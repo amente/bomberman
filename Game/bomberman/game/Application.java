@@ -21,14 +21,14 @@ public class Application {
 		}
 		
 		int listenPort = Integer.parseInt(args[0]);	
-		int broadcastPort = Integer.parseInt(args[1]);		
+		//int broadcastPort = Integer.parseInt(args[1]);		
 		
 		int xSize = Integer.parseInt(args[2]);
 		int ySize = Integer.parseInt(args[3]);
 		
 		
-		GameServer server = new GameServer(listenPort);
-		GameResolver gameResolver = new GameResolver(server,broadcastPort,xSize,ySize);
+		GameServer server = new GameServer(listenPort);//broadcastPort);
+		GameResolver gameResolver = new GameResolver(server,xSize,ySize);
 		
 		server.start();
 		gameResolver.start();

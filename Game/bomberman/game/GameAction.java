@@ -11,15 +11,7 @@ public class GameAction {
 		
 	}
 	
-	public enum MovementType{		
-		UP,
-		DOWN,
-		LEFT,
-		RIGHT		
-	}
-	
-	
-	
+		
 	private Type type;
 	private HashMap<String,String> parameters;
 	
