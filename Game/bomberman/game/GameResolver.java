@@ -60,8 +60,7 @@ public class GameResolver extends Thread{
 	private void processMessages(){
 		
 		//This is critical call, but the ArrayBlockingQueue is thread safe
-		DatagramPacket packet = gameServer.messageQueue.poll();
-		byte[] message = packet!=null?packet.getData():null;	
+		String message = gameServer.messageQueue.poll();
 		
 		if(message!=null){
 			GameAction action = GameProtocol.getInstance().getAction(message);			

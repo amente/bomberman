@@ -1,44 +1,44 @@
 package bomberman.game;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
 import java.util.concurrent.ArrayBlockingQueue;
 
-
-
+import bomberman.test.TestDriver;
 
 public class GameServer extends Thread {
 	
-	private DatagramSocket recieveSocket;
-	private DatagramPacket packet;	
-	private boolean isStopped;
+	private UDPWrapper udpWrapper;
+	private boolean isStopped = false;
+	private boolean testDriverSetup = false;
 	
-	public ArrayBlockingQueue<DatagramPacket> messageQueue; // Thread safe FIFO Queue	
+	public ArrayBlockingQueue<String> messageQueue; // Thread safe FIFO Queue	
 	
 	public GameServer(int port){			
-		try {
-			recieveSocket = new DatagramSocket(port);			
-			messageQueue = new ArrayBlockingQueue<DatagramPacket>(Application.QUEUE_CAPACITY);		
-			
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-		
+		udpWrapper = new UDPWrapper(port, true);
+		messageQueue = new ArrayBlockingQueue<String>(Application.QUEUE_CAPACITY);		
 	}	
 	
+	public void setup(){
+		DatagramPacket packet = udpWrapper.receiveSynchronous();
+		handleSetupMessage(packet);
+	}
+	
+	private void handleSetupMessage(DatagramPacket packet) {
+		String message = udpWrapper.getPacketMessage(packet);
+		String[] messageArr = message.split("\\" + Application.MESSAGE_DELIMITER);
+		String messageCode = messageArr[0];
+		
+		if (messageCode.equals(TestDriver.Protocol.SETUP_CONNECTION)){
+			testDriverSetup = true;
+		} 
+	}
+
 	public boolean listen(){		
-		try {		
-			byte[] recieveBuffer = new byte[Application.MAX_DTATAGRAM_SIZE];
-			packet  = new DatagramPacket(recieveBuffer,recieveBuffer.length);
-			recieveSocket.receive(packet);			
-			messageQueue.add(packet);			
-		} catch (IOException e) {	
-			e.printStackTrace();
-			return false;
-		}		
+		DatagramPacket packet = udpWrapper.receiveAsynchronous();
+		String message = new String(packet.getData());
+		System.out.println(message);
+		messageQueue.add(message);
+			
 		return true;
 	}
 	
@@ -47,15 +47,24 @@ public class GameServer extends Thread {
 	}
 
 	@Override
-	public void run(){			
+	public void run(){	
+		while(!gameIsSetup()){
+			setup();
+		}
+		System.out.println("Game setup correctly");
 		while(!isStopped){
 			listen();
 		}		
 	}
 	
+	private boolean gameIsSetup() {
+		return testDriverSetup;
+	}
+	
 	
 	public void stopGracefully(){
-		isStopped = true;		
+		isStopped = true;	
+		testDriverSetup = true;
 	}
 	
 }

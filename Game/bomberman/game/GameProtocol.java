@@ -18,8 +18,8 @@ public class GameProtocol {
 	
 	
 	
-	public GameAction getAction(byte[] message){	
-		// TODO: Parse the message according to the protocol and make an action
+	public GameAction getAction(String message){	
+		System.out.println("Handling message: " + message);
 		return new GameAction();
 	}
 	
