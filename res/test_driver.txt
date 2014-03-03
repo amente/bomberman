@@ -3,7 +3,5 @@ Join Player2
 Game START_GAME
 Move UP Player1
 Move DOWN Player2
-Move LEFT Player1
-Move RIGHT Player1
-Move RIGHT Player2
+Move DOWN Player1
 Game END_GAME

@@ -26,12 +26,12 @@ public class Floor {
 	public int xSize = 0; // 
 	public int ySize = 0;		
 	
-	private List<Player> players;
+	public List<Player> players;
 	
 	public FloorObject[][] grid;
-		
-
-	public Floor(String filePath){		
+	
+	public Floor(String filePath){	
+		players = new ArrayList<Player>(4);
 		loadStateFromTmxFile(filePath);
 	}
 
@@ -55,6 +55,7 @@ public class Floor {
 		if(grid[x][y]== null){
 			grid[o.getX()][o.getY()]=null; // Remove from previous location			
 			o.setLocationTo(x, y);
+			System.out.println("x: " + x + " y: " + y);
 			grid[x][y] = o; // Move to new location
 			return true;
 		}else{
@@ -63,20 +64,17 @@ public class Floor {
 		}		
 	}	
 		
-	public void placeNewObjectAt(FloorObject o,int x,int y){
+	public boolean placeNewObjectAt(FloorObject o,int x,int y){
 		
 		// Is the location occupied by another object
 		if (grid[x][y] == null) {
 			grid[o.getX()][o.getY()] = null; // Remove from previous location
 			o.setLocationTo(x, y);
-			grid[x][y] = o; // Move to new location			
-		} else {
-			//Placed new object at occupied space
-			//TODO; Implement this with a better approach;			
-			placeNewObjectAt(o,x++,y++); // Try diagonal one up
+			grid[x][y] = o; // Move to new location		
+			return true;
 		}	
 		
-		
+		return false;
 	}
 	
 	
@@ -92,14 +90,26 @@ public class Floor {
 	}
 	
 	public void addPlayer(Player player) {
-		players.add(player);
-		
 		int listSize = players.size();
 		// 0 = top left, 1 = top right, 2 = bottom left, 3 = bottom right
 		int playerYPosition = (ySize-1)*(listSize/2);
 		int playerXPosition = (xSize-1)*(listSize%2);
 		
-		placeNewObjectAt(player, playerXPosition, playerYPosition);
+		addPlayer(player, playerXPosition, playerYPosition);
+	}
+	
+	public void addPlayer(Player player, int x, int y) {
+		if (getPlayerByName(player.getName()) != null){
+			System.out.println("Player with name already in game");
+			return;
+		}
+		
+		players.add(player);
+		
+		System.out.println("Adding player: " + player.getName());
+		if (!placeNewObjectAt(player, x, y)){
+			placeNewObjectAt(player,x,y+1);
+		}
 	}
 	
 	public void loadStateFromTmxFile(String filePath){
@@ -108,6 +118,7 @@ public class Floor {
 		grid = TmxParser.parse(f, this);		
 		xSize = grid[0].length;
 		ySize = grid.length;
+		
 	}
 	
 	
@@ -118,6 +129,15 @@ public class Floor {
 		
 		
 		
+	}
+
+	public Player getPlayerByName(String playerName) {
+		for (Player player : players) {
+			if (player.getName().equals(playerName)){
+				return player;
+			}
+		}
+		return null; 
 	}
 		
 	

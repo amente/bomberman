@@ -101,6 +101,24 @@ public class GameResolver extends Thread{
 		// Locate the player on the board
 		// Get the movement type from action parameters
 		// Invoke the move on the floor
+		String playerName = action.getParameter("PLAYER");
+		
+		Player player = gameFloor.getPlayerByName(playerName);
+		if (player == null) {
+			System.out.println("Player: " + playerName + " not found");
+		}
+		
+		String direction = action.getParameter("DIR");
+		
+		if (direction.equals("UP")) {
+			player.moveUp();
+		} else if (direction.equals("DOWN")) {
+			player.moveDown();
+		} else if (direction.equals("LEFT")) {
+			player.moveLeft();
+		} else if (direction.equals("RIGHT")) {
+			player.moveRight();
+		}
 	}
 	
 	

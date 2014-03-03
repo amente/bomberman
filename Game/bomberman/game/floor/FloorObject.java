@@ -35,18 +35,22 @@ public abstract class FloorObject{
 	}	
 	
 	public void moveLeft(){			
+		System.out.println("Moving object: " + name + " left.");
 		floor.moveObjectTo(this,x++,y);
 	}	
 	
 	public void moveRight(){			
+		System.out.println("Moving object: " + name + " right.");
 		floor.moveObjectTo(this,x--,y);
 	}	
 	
 	public void moveUp(){			
+		System.out.println("Moving object: " + name + " up.");
 		floor.moveObjectTo(this,x,y++);
 	}	
 	
 	public void moveDown(){			
+		System.out.println("Moving object: " + name + " down.");
 		floor.moveObjectTo(this,x,y--);
 	}	
 	

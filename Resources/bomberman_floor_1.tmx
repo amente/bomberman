@@ -17,6 +17,11 @@
     <property name="name" value="door"/>
    </properties>
   </tile>
+  <tile id="3">
+   <properties>
+    <property name="name" value="player"/>
+   </properties>
+  </tile>
  </tileset>
  <layer name="main_layer" width="20" height="20">
   <data>
@@ -93,7 +98,6 @@
    <tile gid="2"/>
    <tile gid="1"/>
    <tile gid="2"/>
-   <tile gid="1"/>
    <tile gid="1"/>
    <tile gid="2"/>
    <tile gid="1"/>
@@ -420,6 +424,6 @@
    <tile gid="1"/>
    <tile gid="1"/>
    <tile gid="1"/>
-  </data>
+ </data>
  </layer>
 </map>

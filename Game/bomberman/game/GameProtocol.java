@@ -19,7 +19,11 @@ public class GameProtocol {
 			MOVE {Dir} PLAYER_NAME
 				Dir = {UP,DOWN,LEFT,RIGHT}
 	Bomb:
-			BOMB PLAYER_NAME				
+			BOMB PLAYER_NAME	
+			
+	Game:
+			Game START_GAME
+			Game END_GAME
 	
 	*/
 	private static GameProtocol theProtocol;
@@ -45,7 +49,7 @@ public class GameProtocol {
 		
 		GameAction action = null;
 		
-		
+
 		if(params[0].equals("Move")){	
 			if(params.length!=3) { return null;}
 			action = new GameAction();

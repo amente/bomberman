@@ -18,6 +18,7 @@ import bomberman.game.floor.Block;
 import bomberman.game.floor.Door;
 import bomberman.game.floor.Floor;
 import bomberman.game.floor.FloorObject;
+import bomberman.game.floor.Player;
 
 /**
  * Parses the XML map file '.tmx' and constructs the floor grid 
@@ -59,8 +60,8 @@ public class TmxParser {
 			
 			int width = Integer.parseInt(map.getAttribute("width"));	
 			int height = Integer.parseInt(map.getAttribute("height"));
-								
 			
+						
 			Node main_layer = map.getElementsByTagName("layer").item(0);
 			Node data = ((Element)main_layer).getElementsByTagName("data").item(0);
 			
@@ -77,7 +78,7 @@ public class TmxParser {
 				
 				int id= Integer.parseInt(((Element)master_tiles.item(i)).getAttribute("id"))+firstGid;
 				Node props = ((Element)master_tiles.item(i)).getElementsByTagName("properties").item(0);
-				String name = ((Element)((Element)props).getElementsByTagName("property").item(0)).getAttribute("value");				
+				String name = ((Element)((Element)props).getElementsByTagName("property").item(0)).getAttribute("value");	
 				tileSet.put(id,name);		
 				
 			}
@@ -93,7 +94,10 @@ public class TmxParser {
 				
 				if(i==height-1){gridY++;}			
 				
-				int gId = Integer.parseInt(((Element)grid_tiles.item(i)).getAttribute("gid"));				
+				Element tile = (Element)grid_tiles.item(i);
+
+				
+				int gId = Integer.parseInt(tile.getAttribute("gid"));							
 				
 				String tileType = tileSet.get(gId);
 				
@@ -102,7 +106,14 @@ public class TmxParser {
 					
 				}else if(tileType.equalsIgnoreCase("door")){
 					grid[i%width][gridY] = new Door(floor);					
-				}		
+				} else if (tileType.equalsIgnoreCase("player")){
+					String playerName = tile.getAttribute("player_name");
+				
+					Player player = new Player(floor, playerName);
+					
+					grid[i%width][gridY] = player;
+					floor.players.add(player);
+				} 
 				
 			}
 			
