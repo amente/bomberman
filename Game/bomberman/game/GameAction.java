@@ -7,8 +7,8 @@ public class GameAction {
 	public enum Type{		
 		JOIN_LEAVE,
 		MOVE,
-		BOMB		
-		
+		BOMB, 
+		GAME		
 	}
 	
 		
@@ -23,6 +23,9 @@ public class GameAction {
 		parameters.put(key, value);
 	}
 	
+	public String getParameter(String key) {
+		return parameters.get(key);
+	}
 	
 	public GameAction.Type getType(){
 		return type;
@@ -32,4 +35,14 @@ public class GameAction {
 		this.type = type; 
 	}
 
+	public String toString() {
+		String s = "ACTION: " + type.toString()
+					+ " | WITH PARAMETERS: ";
+		
+		for(String key : parameters.keySet()) {
+			s += key + ": " + parameters.get(key) + " | ";
+		}
+		
+		return s;
+	}
 }

@@ -1,51 +1,65 @@
 package bomberman.game;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
 import java.util.concurrent.ArrayBlockingQueue;
+
+import Buffer.Consumer;
+import Buffer.IBuffer;
+import Buffer.Producer;
+import Buffer.SingleBuffer;
+import bomberman.test.TestDriver;
 
 public class GameServer extends Thread {
 	
-	private DatagramSocket recieveSocket;
-	private DatagramPacket packet;	
+	private UDPWrapper udpWrapper;
+	private boolean isStopped = false;
+	private boolean gameSetup = false;
+	private Logger logger = null;
 	
-		
-	private boolean isStopped;
+	private IBuffer<String> messageBuffer; // Thread safe FIFO Queue
+	private Producer<String> producer;
+	public Consumer<String> consumer;
 	
-	public ArrayBlockingQueue<DatagramPacket> messageQueue; // Thread safe FIFO Queue	
-	
-	public GameServer(int listenPort,int broadcastPort){			
-		try {
-			recieveSocket = new DatagramSocket(listenPort);			
-			messageQueue = new ArrayBlockingQueue<DatagramPacket>(Application.QUEUE_CAPACITY);		
-			
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-		
-	}	
-	
-	/**
-	 * Send the game status to clients
-	 * @return
-	 */
-	public void sendMessageToClients(byte[] message){		
-		
+	public void setLogger(Logger l){
+		logger = l;
 	}
 	
+	public GameServer(int port){			
+		udpWrapper = new UDPWrapper(port, true);
+		messageBuffer = new SingleBuffer<String>(Application.QUEUE_CAPACITY);	
+		producer = new Producer<String>(messageBuffer);
+		consumer = new Consumer<String>(messageBuffer);
+	}	
+	
+	public boolean setup(){
+		DatagramPacket packet = udpWrapper.receiveSynchronous();
+		
+		if (packet == null) { return false; }
+		
+		handleSetupMessage(packet);
+		
+		return true;
+	}
+	
+	private void handleSetupMessage(DatagramPacket packet) {
+		String message = udpWrapper.getPacketMessage(packet).trim();
+		String[] messageArr = message.split(" ");
+		if (messageArr[1].trim().equals("START_GAME")){
+			gameSetup = true;
+			if (logger != null) { logger.addToLog(message); }
+		} else if (messageArr[0].trim().equals("Join")){
+			producer.produce(message);
+		}
+	}
+
 	public boolean listen(){		
-		try {		
-			byte[] recieveBuffer = new byte[Application.MAX_DTATAGRAM_SIZE];
-			packet  = new DatagramPacket(recieveBuffer,recieveBuffer.length);
-			recieveSocket.receive(packet);			
-			messageQueue.add(packet);			
-		} catch (IOException e) {	
-			e.printStackTrace();
-			return false;
-		}		
+		DatagramPacket packet = udpWrapper.receiveAsynchronous();
+		
+		if (packet == null) { return false; }
+		
+		String message = new String(packet.getData()).trim();
+		producer.produce(message);
+			
 		return true;
 	}
 	
@@ -54,15 +68,24 @@ public class GameServer extends Thread {
 	}
 
 	@Override
-	public void run(){			
+	public void run(){	
+		while(!gameIsSetup()){
+			setup();
+		}
 		while(!isStopped){
 			listen();
 		}		
 	}
 	
+	private boolean gameIsSetup() {
+		return gameSetup;
+	}
+	
 	
 	public void stopGracefully(){
-		isStopped = true;		
+		isStopped = true;	
+		gameSetup = true;
+		udpWrapper.interrupt();
 	}
 	
 }

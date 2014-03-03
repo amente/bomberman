@@ -3,13 +3,14 @@ package bomberman.game;
 import java.net.DatagramPacket;
 
 import bomberman.game.floor.Floor;
+import bomberman.game.floor.Player;
 
 
 public class GameResolver extends Thread{
 	
 	static Floor gameFloor;	
 	GameServer gameServer;
-	
+	private Logger logger;
 	
 	public GameResolver(GameServer gameServer){
 		
@@ -17,12 +18,16 @@ public class GameResolver extends Thread{
 		this.gameServer = gameServer;
 	}	
 	
+	public void setLogger(Logger l){
+		logger = l;
+	}
+	
 		
 	@Override
 	public void run(){
 		
 		while(gameServer.isRunning()){
-			processMessages();				
+			processMessages();
 		}
 		
 	}
@@ -33,11 +38,14 @@ public class GameResolver extends Thread{
 	private void processMessages(){
 		
 		//This is critical call, but the ArrayBlockingQueue is thread safe
-		DatagramPacket packet = gameServer.messageQueue.poll();
-		byte[] message = packet!=null?packet.getData():null;	
+		String message = gameServer.consumer.consume();
 		
 		if(message!=null){
 			GameAction action = GameProtocol.getInstance().getAction(message);			
+			
+			if (logger != null){
+				logger.addToLog(action.toString());
+			}
 			
 			GameAction.Type t = action.getType();
 			
@@ -51,11 +59,23 @@ public class GameResolver extends Thread{
 				break;			
 			case BOMB:
 				processBombAction(action);
-				break;		
-			
+				break;	
+			case GAME:
+				processGameAction(action);
+				break;
 			}		
 			
 		}		
+		
+	}
+
+	private void processGameAction(GameAction action) {
+		String type = action.getParameter("CALL");
+		
+		if (type.equals("END_GAME")) {
+			gameServer.stopGracefully();
+			logger.stopLogging();
+		}
 		
 	}
 
@@ -64,7 +84,6 @@ public class GameResolver extends Thread{
 		// Get the name of the player from action parameters
 		// Get the location the player on the board
 		// Get a bomb from the factory and put at the players location
-		
 	}
 
 	private void processJoinAction(GameAction action) {
@@ -72,7 +91,10 @@ public class GameResolver extends Thread{
 		// Get the name of the player from action paramters
 		// Get the type of request JOIN or LEAVE from paramters
 		// Create a Player and place it on the floor
+		String playerName = action.getParameter("PLAYER");
+		Player player = new Player(gameFloor, playerName);
 		
+		gameFloor.addPlayer(player);
 	}
 
 	private void processMoveAction(GameAction action) {

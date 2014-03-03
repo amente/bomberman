@@ -1,8 +1,13 @@
 package bomberman.game.floor;
 
+
 import java.io.File;
 
 import bomberman.game.utils.TmxParser;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * 
@@ -21,10 +26,26 @@ public class Floor {
 	public int xSize = 0; // 
 	public int ySize = 0;		
 	
+	private List<Player> players;
+	
 	public FloorObject[][] grid;
 		
+
 	public Floor(String filePath){		
 		loadStateFromTmxFile(filePath);
+
+	public Floor(int xSize, int ySize){		
+		this.xSize = xSize;
+		this.ySize = ySize;
+		initialize();			
+		
+	}
+	
+	// Initializes the grid
+	private void initialize(){
+		grid = new FloorObject[xSize][ySize];
+		players = new ArrayList<Player>(4);
+
 	}
 	
 	public boolean moveObjectTo(FloorObject o,int x,int y)
@@ -69,6 +90,16 @@ public class Floor {
 		return state.toString();
 	}
 	
+	public void addPlayer(Player player) {
+		players.add(player);
+		
+		int listSize = players.size();
+		// 0 = top left, 1 = top right, 2 = bottom left, 3 = bottom right
+		int playerYPosition = (ySize-1)*(listSize/2);
+		int playerXPosition = (xSize-1)*(listSize%2);
+		
+		placeNewObjectAt(player, playerXPosition, playerYPosition);
+	}
 	
 	public void loadStateFromTmxFile(String filePath){
 		

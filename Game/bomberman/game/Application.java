@@ -7,6 +7,7 @@ public class Application {
 	public static final int QUEUE_CAPACITY = 10;
 	public static final int MAX_DTATAGRAM_SIZE = 1024; // In Bytes
 	public static final String BROADCAST_ADDR = "203.0.113.0";
+	public static final String MESSAGE_DELIMITER = "/delim/";
 	
 	
 	static boolean gameRunning = false;
@@ -20,13 +21,30 @@ public class Application {
 		}
 		
 		int listenPort = Integer.parseInt(args[0]);	
+
 		int broadcastPort = Integer.parseInt(args[1]);		
 				
 		
 		GameServer server = new GameServer(listenPort,broadcastPort);
 		GameResolver gameResolver = new GameResolver(server);
+
+		//int broadcastPort = Integer.parseInt(args[1]);		
+		
+		int xSize = Integer.parseInt(args[2]);
+		int ySize = Integer.parseInt(args[3]);
+		
+		Logger logger = new Logger();
+		new Thread(logger).start();
+		
+		GameServer server = new GameServer(listenPort);//broadcastPort);
+		server.setLogger(logger);
+		
+		GameResolver gameResolver = new GameResolver(server,xSize,ySize);
+
 		
 		server.start();
+		
+		gameResolver.setLogger(logger);
 		gameResolver.start();
 		
 	    	    
