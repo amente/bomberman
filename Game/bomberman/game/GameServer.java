@@ -9,34 +9,48 @@ public class GameServer extends Thread {
 	
 	private UDPWrapper udpWrapper;
 	private boolean isStopped = false;
-	private boolean testDriverSetup = false;
+	private boolean gameSetup = false;
+	private Logger logger = null;
 	
 	public ArrayBlockingQueue<String> messageQueue; // Thread safe FIFO Queue	
+	
+	public void setLogger(Logger l){
+		logger = l;
+	}
 	
 	public GameServer(int port){			
 		udpWrapper = new UDPWrapper(port, true);
 		messageQueue = new ArrayBlockingQueue<String>(Application.QUEUE_CAPACITY);		
 	}	
 	
-	public void setup(){
+	public boolean setup(){
 		DatagramPacket packet = udpWrapper.receiveSynchronous();
+		
+		if (packet == null) { return false; }
+		
 		handleSetupMessage(packet);
+		
+		return true;
 	}
 	
 	private void handleSetupMessage(DatagramPacket packet) {
-		String message = udpWrapper.getPacketMessage(packet);
-		String[] messageArr = message.split("\\" + Application.MESSAGE_DELIMITER);
-		String messageCode = messageArr[0];
-		
-		if (messageCode.equals(TestDriver.Protocol.SETUP_CONNECTION)){
-			testDriverSetup = true;
-		} 
+		String message = udpWrapper.getPacketMessage(packet).trim();
+		String[] messageArr = message.split(" ");
+		if (messageArr[1].trim().equals("START_GAME")){
+			System.out.println("Starting game");
+			gameSetup = true;
+			if (logger != null) { logger.addToLog(message); }
+		} else if (messageArr[0].trim().equals("Join")){
+			messageQueue.add(message);
+		}
 	}
 
 	public boolean listen(){		
 		DatagramPacket packet = udpWrapper.receiveAsynchronous();
-		String message = new String(packet.getData());
-		System.out.println(message);
+		
+		if (packet == null) { return false; }
+		
+		String message = new String(packet.getData()).trim();
 		messageQueue.add(message);
 			
 		return true;
@@ -51,20 +65,20 @@ public class GameServer extends Thread {
 		while(!gameIsSetup()){
 			setup();
 		}
-		System.out.println("Game setup correctly");
 		while(!isStopped){
 			listen();
 		}		
 	}
 	
 	private boolean gameIsSetup() {
-		return testDriverSetup;
+		return gameSetup;
 	}
 	
 	
 	public void stopGracefully(){
 		isStopped = true;	
-		testDriverSetup = true;
+		gameSetup = true;
+		udpWrapper.interrupt();
 	}
 	
 }

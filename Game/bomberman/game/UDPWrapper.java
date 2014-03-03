@@ -43,9 +43,12 @@ public class UDPWrapper {
 			InetAddress ip = InetAddress.getByName(address);
 			byte[] bytes = message.getBytes();
 			DatagramPacket p = new DatagramPacket(bytes, message.length(), ip, port);
-			System.out.println("Sending to address: " + ip + " port: " + port);
 			socket.send(p);
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			System.out.println("Failed to send message in UDPWrapper.sendAsynchronous "
+					+ "to address: " + address + " port: " + port);
+			e.printStackTrace();
+		}
 	}
 	
 	public DatagramPacket receiveAsynchronous() {
@@ -57,12 +60,10 @@ public class UDPWrapper {
 		} catch (SocketException e1) {}
 		
 		try {
-			System.out.println("Receiving on address: " + socket.getLocalAddress() + " port: " + socket.getLocalPort());
 			socket.receive(packet);
 			
 			return packet;
 		} catch (IOException e) {
-			System.out.println("Receive asynchronous failed in UDPWrapper due to IOException");
 			return null;
 		}
 	}
@@ -70,7 +71,7 @@ public class UDPWrapper {
 	public void sendSynchronous(String message){
 		message = packetNum++ + packetNumDelimiter + message;
 		byte[] bytes = message.getBytes();
-		DatagramPacket p = new DatagramPacket(bytes, bytes.length);
+		DatagramPacket p = new DatagramPacket(bytes, bytes.length, socket.getLocalAddress(), socket.getLocalPort());
 		sendSynchronous(p);
 	}
 	
@@ -179,5 +180,9 @@ public class UDPWrapper {
 
 	private boolean hasPacketList() {
 		return receivedPackets != null;
+	}
+
+	public void interrupt() {
+		socket.close();
 	}
 }

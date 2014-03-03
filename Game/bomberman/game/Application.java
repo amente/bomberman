@@ -26,11 +26,17 @@ public class Application {
 		int xSize = Integer.parseInt(args[2]);
 		int ySize = Integer.parseInt(args[3]);
 		
+		Logger logger = new Logger();
+		new Thread(logger).start();
 		
 		GameServer server = new GameServer(listenPort);//broadcastPort);
+		server.setLogger(logger);
+		
 		GameResolver gameResolver = new GameResolver(server,xSize,ySize);
 		
 		server.start();
+		
+		gameResolver.setLogger(logger);
 		gameResolver.start();
 		
 	    	    

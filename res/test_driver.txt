@@ -1,3 +1,9 @@
-Hello world
-How are you world
-you well world?
+Join Player1
+Join Player2
+Game START_GAME
+Move UP Player1
+Move DOWN Player2
+Move LEFT Player1
+Move RIGHT Player1
+Move RIGHT Player2
+Game END_GAME

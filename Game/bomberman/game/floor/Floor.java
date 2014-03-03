@@ -1,5 +1,8 @@
 package bomberman.game.floor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 
  * Floor represents the a 2D game grid * 
@@ -17,6 +20,8 @@ public class Floor {
 	public int xSize; // 
 	public int ySize;		
 	
+	private List<Player> players;
+	
 	public FloorObject[][] grid;
 		
 	public Floor(int xSize, int ySize){		
@@ -28,7 +33,8 @@ public class Floor {
 	
 	// Initializes the grid
 	private void initialize(){
-		grid = new FloorObject[xSize][ySize];		
+		grid = new FloorObject[xSize][ySize];
+		players = new ArrayList<Player>(4);
 	}
 	
 		
@@ -74,6 +80,16 @@ public class Floor {
 		return state.toString();
 	}
 	
+	public void addPlayer(Player player) {
+		players.add(player);
+		
+		int listSize = players.size();
+		// 0 = top left, 1 = top right, 2 = bottom left, 3 = bottom right
+		int playerYPosition = (ySize-1)*(listSize/2);
+		int playerXPosition = (xSize-1)*(listSize%2);
+		
+		placeNewObjectAt(player, playerXPosition, playerYPosition);
+	}
 	
 	public void loadStateFromFile(String filePath){
 		

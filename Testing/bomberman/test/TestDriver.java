@@ -8,14 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bomberman.game.Application;
+import bomberman.game.Player;
 import bomberman.game.UDPWrapper;
 
 public class TestDriver {
-	public class Protocol {
-		public static final String SETUP_CONNECTION = "SETUP_CONNECTION";
-	}
-	
-	
 	public static void main(String args[]) {
 		if (args.length != 2) {
 			System.out.println("usage: java TestDriver <ip-address> <port>");
@@ -27,11 +23,11 @@ public class TestDriver {
 		
 		UDPWrapper udpWrapper = new UDPWrapper();
 		
-		udpWrapper.sendSynchronous(
-			Protocol.SETUP_CONNECTION + Application.MESSAGE_DELIMITER,
+		/*udpWrapper.sendSynchronous(
+			Player.Controls.START_GAME + Application.MESSAGE_DELIMITER,
 			port, 
 			address
-		);
+		);*/
 		
 		List<String> readLines = new ArrayList<String>();
 		File file = new File("res/test_driver.txt");
@@ -54,8 +50,19 @@ public class TestDriver {
 		    } catch (IOException e) {}
 		}
 		
+		boolean started = false;
 		for(String line : readLines) {
-			udpWrapper.sendAsynchronous(line, port, address);
+			String[] lineArr = line.split(" ");
+			
+			if (lineArr[1].equals("START_GAME") || lineArr[0].equals("Join")){
+				udpWrapper.sendSynchronous(line, port, address);
+				if (lineArr[1].equals("START_GAME")) {
+					started = true;
+				}
+			} else {
+				if (!started) { continue; }
+				udpWrapper.sendAsynchronous(line, port, address);
+			}
 		}
 		
 	}

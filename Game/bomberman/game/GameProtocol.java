@@ -46,7 +46,7 @@ public class GameProtocol {
 		GameAction action = null;
 		
 		
-		if(params[0].equals("MOVE")){	
+		if(params[0].equals("Move")){	
 			if(params.length!=3) { return null;}
 			action = new GameAction();
 			action.setType(GameAction.Type.MOVE);			
@@ -59,13 +59,24 @@ public class GameProtocol {
 			action.setType(GameAction.Type.BOMB);			
 			action.addParameter("PLAYER",params[0]);
 			
-		}else if(params[0].equals("JOIN") || params[0].equals("LEAVE")){
+		}else if(params[0].equals("Join") || params[0].equals("LEAVE")){
 			action = new GameAction();
 			action.setType(GameAction.Type.JOIN_LEAVE);			
 			action.addParameter("TYPE",params[0]);
 			action.addParameter("PLAYER",params[1]);
 			
-		}		
+		} else if (params[0].equals("Game")) {
+			if (params.length != 2) { return null; }
+			
+			action = new GameAction();
+			action.setType(GameAction.Type.GAME);			
+			action.addParameter("TYPE",params[0]);
+
+			if (params[1].trim().equals("END_GAME")) {
+				action.addParameter("CALL", params[1].trim());
+			}
+		}
+
 		
 		return action;
 	}
