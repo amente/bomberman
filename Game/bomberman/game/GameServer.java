@@ -3,6 +3,10 @@ package bomberman.game;
 import java.net.DatagramPacket;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import Buffer.Consumer;
+import Buffer.IBuffer;
+import Buffer.Producer;
+import Buffer.SingleBuffer;
 import bomberman.test.TestDriver;
 
 public class GameServer extends Thread {
@@ -12,7 +16,9 @@ public class GameServer extends Thread {
 	private boolean gameSetup = false;
 	private Logger logger = null;
 	
-	public ArrayBlockingQueue<String> messageQueue; // Thread safe FIFO Queue	
+	private IBuffer<String> messageBuffer; // Thread safe FIFO Queue
+	private Producer<String> producer;
+	public Consumer<String> consumer;
 	
 	public void setLogger(Logger l){
 		logger = l;
@@ -20,7 +26,9 @@ public class GameServer extends Thread {
 	
 	public GameServer(int port){			
 		udpWrapper = new UDPWrapper(port, true);
-		messageQueue = new ArrayBlockingQueue<String>(Application.QUEUE_CAPACITY);		
+		messageBuffer = new SingleBuffer<String>(Application.QUEUE_CAPACITY);	
+		producer = new Producer<String>(messageBuffer);
+		consumer = new Consumer<String>(messageBuffer);
 	}	
 	
 	public boolean setup(){
@@ -37,11 +45,10 @@ public class GameServer extends Thread {
 		String message = udpWrapper.getPacketMessage(packet).trim();
 		String[] messageArr = message.split(" ");
 		if (messageArr[1].trim().equals("START_GAME")){
-			System.out.println("Starting game");
 			gameSetup = true;
 			if (logger != null) { logger.addToLog(message); }
 		} else if (messageArr[0].trim().equals("Join")){
-			messageQueue.add(message);
+			producer.produce(message);
 		}
 	}
 
@@ -51,7 +58,7 @@ public class GameServer extends Thread {
 		if (packet == null) { return false; }
 		
 		String message = new String(packet.getData()).trim();
-		messageQueue.add(message);
+		producer.produce(message);
 			
 		return true;
 	}

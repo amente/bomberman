@@ -38,7 +38,7 @@ public class GameResolver extends Thread{
 	private void processMessages(){
 		
 		//This is critical call, but the ArrayBlockingQueue is thread safe
-		String message = gameServer.messageQueue.poll();
+		String message = gameServer.consumer.consume();
 		
 		if(message!=null){
 			GameAction action = GameProtocol.getInstance().getAction(message);			
