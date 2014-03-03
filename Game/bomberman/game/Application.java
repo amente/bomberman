@@ -16,18 +16,15 @@ public class Application {
 	public static void main(String args[]) throws IOException{
 		
 		if(args.length<1){
-			System.out.println("Usage: java Application listenPort broadcastPort xSize ySize");
+			System.out.println("Usage: java Application listenPort");
 		}
 		
 		int listenPort = Integer.parseInt(args[0]);	
 		int broadcastPort = Integer.parseInt(args[1]);		
-		
-		int xSize = Integer.parseInt(args[2]);
-		int ySize = Integer.parseInt(args[3]);
-		
+				
 		
 		GameServer server = new GameServer(listenPort,broadcastPort);
-		GameResolver gameResolver = new GameResolver(server,xSize,ySize);
+		GameResolver gameResolver = new GameResolver(server);
 		
 		server.start();
 		gameResolver.start();

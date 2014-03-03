@@ -1,5 +1,9 @@
 package bomberman.game.floor;
 
+import java.io.File;
+
+import bomberman.game.utils.TmxParser;
+
 /**
  * 
  * Floor represents the a 2D game grid * 
@@ -14,24 +18,15 @@ public class Floor {
 	
 	public static final String EMPTYNAME = "_"; // String representation of an empty floor grid
 	
-	public int xSize; // 
-	public int ySize;		
+	public int xSize = 0; // 
+	public int ySize = 0;		
 	
 	public FloorObject[][] grid;
 		
-	public Floor(int xSize, int ySize){		
-		this.xSize = xSize;
-		this.ySize = ySize;
-		initialize();			
-		
+	public Floor(String filePath){		
+		loadStateFromTmxFile(filePath);
 	}
 	
-	// Initializes the grid
-	private void initialize(){
-		grid = new FloorObject[xSize][ySize];		
-	}
-	
-		
 	public boolean moveObjectTo(FloorObject o,int x,int y)
 	{
 		//Is the location occupied by another object
@@ -75,11 +70,15 @@ public class Floor {
 	}
 	
 	
-	public void loadStateFromFile(String filePath){
+	public void loadStateFromTmxFile(String filePath){
 		
-		
-		
+		File f = new File(filePath);
+		grid = TmxParser.parse(f, this);		
+		xSize = grid[0].length;
+		ySize = grid.length;
 	}
+	
+	
 	
 	public void writeStateToFile(String filePath){
 		

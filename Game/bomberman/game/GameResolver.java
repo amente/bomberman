@@ -11,9 +11,9 @@ public class GameResolver extends Thread{
 	GameServer gameServer;
 	
 	
-	public GameResolver(GameServer gameServer,int xSize,int ySize){
+	public GameResolver(GameServer gameServer){
 		
-		gameFloor = new Floor(xSize,ySize);			
+		gameFloor = new Floor("Resources/bomberman_floor_1.tmx");		
 		this.gameServer = gameServer;
 	}	
 	
