@@ -6,9 +6,10 @@ import java.util.Queue;
 
 import org.junit.Test;
 
-import Buffer.Consumer;
-import Buffer.DoubleBuffer;
-import Buffer.IBuffer;
+import bomberman.utils.buffer.Consumer;
+import bomberman.utils.buffer.DoubleBuffer;
+import bomberman.utils.buffer.IBuffer;
+
 
 public class ConsumerTests {
 

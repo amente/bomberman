@@ -1,7 +1,5 @@
 package bomberman.game;
 
-import java.net.DatagramPacket;
-
 import bomberman.game.floor.Floor;
 import bomberman.game.floor.Player;
 

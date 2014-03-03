@@ -1,13 +1,12 @@
 package bomberman.game;
 
 import java.net.DatagramPacket;
-import java.util.concurrent.ArrayBlockingQueue;
 
-import Buffer.Consumer;
-import Buffer.IBuffer;
-import Buffer.Producer;
-import Buffer.SingleBuffer;
-import bomberman.test.TestDriver;
+import bomberman.utils.buffer.Consumer;
+import bomberman.utils.buffer.IBuffer;
+import bomberman.utils.buffer.Producer;
+import bomberman.utils.buffer.SingleBuffer;
+
 
 public class GameServer extends Thread {
 	

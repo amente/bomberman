@@ -1,4 +1,4 @@
-package DiscardingList;
+package bomberman.utils.discardinglist;
 
 import java.util.LinkedList;
 

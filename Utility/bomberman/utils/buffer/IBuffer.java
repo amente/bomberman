@@ -1,7 +1,7 @@
 /* AUTHOR: Andrew Belu 
    Abstract buffer interface */
 
-package Buffer;
+package bomberman.utils.buffer;
 
 import java.util.Queue;
 

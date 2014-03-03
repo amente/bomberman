@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import bomberman.game.Application;
-import bomberman.game.Player;
 import bomberman.game.UDPWrapper;
 
 public class TestDriver {

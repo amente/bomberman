@@ -8,11 +8,12 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import Buffer.Consumer;
-import Buffer.DoubleBuffer;
-import Buffer.IBuffer;
-import Buffer.Producer;
-import Buffer.SingleBuffer;
+import bomberman.utils.buffer.Consumer;
+import bomberman.utils.buffer.DoubleBuffer;
+import bomberman.utils.buffer.IBuffer;
+import bomberman.utils.buffer.Producer;
+import bomberman.utils.buffer.SingleBuffer;
+
 
 public class BufferTests implements Runnable {
 

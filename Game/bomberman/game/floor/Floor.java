@@ -33,6 +33,7 @@ public class Floor {
 
 	public Floor(String filePath){		
 		loadStateFromTmxFile(filePath);
+	}
 
 	public Floor(int xSize, int ySize){		
 		this.xSize = xSize;

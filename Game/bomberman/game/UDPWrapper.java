@@ -9,7 +9,8 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.List;
 
-import DiscardingList.DiscardingList;
+import bomberman.utils.discardinglist.DiscardingList;
+
 
 public class UDPWrapper {
 	private DatagramSocket socket;

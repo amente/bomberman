@@ -2,7 +2,7 @@
 	Handles multiple producers/consumers
 	The consumer will not consume partial buffers without a call to flush()*/
 
-package Buffer;
+package bomberman.utils.buffer;
 
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;

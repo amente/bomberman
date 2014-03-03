@@ -2,7 +2,7 @@
 	Handles multiple producers/consumers
 	Should handle multiple types of buffers (double, single, triple, etc.)*/
 
-package Buffer;
+package bomberman.utils.buffer;
 
 import java.util.Queue;
 
