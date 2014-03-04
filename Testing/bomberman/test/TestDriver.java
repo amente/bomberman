@@ -31,7 +31,7 @@ public class TestDriver {
 		);*/
 		
 		List<String> readLines = new ArrayList<String>();
-		File file = new File("res/test_driver.txt");
+		File file = new File("Resources/test_driver.txt");
 		BufferedReader reader = null;
 
 		try {

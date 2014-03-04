@@ -1,7 +1,7 @@
 package bomberman.game.floor;
 
 
-public abstract class FloorObject{
+public class FloorObject{
 	
 	private String name;
 	private Floor floor;
@@ -52,14 +52,7 @@ public abstract class FloorObject{
 	public void moveDown(){			
 		System.out.println("Moving object: " + name + " down.");
 		floor.moveObjectTo(this,x,y--);
-	}	
-	
-	/**
-	 * Subclasses implement this to do the logic 
-	 * @param o
-	 * @return canAdvance
-	 */
-	public abstract boolean movedToGridOccupiedBy(FloorObject o);
+	}		
 				
 	
 }	

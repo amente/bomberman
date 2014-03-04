@@ -1,7 +1,7 @@
 package bomberman.game.floor;
 
 
-public class Player extends FloorObject {
+public class Player extends FloorObject implements Movable {
 
 	
 	
@@ -16,7 +16,6 @@ public class Player extends FloorObject {
 		return false;
 	}
 
-	
-	
+		
 	
 }

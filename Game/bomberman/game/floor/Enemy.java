@@ -1,6 +1,6 @@
 package bomberman.game.floor;
 
-public class Enemy extends FloorObject{
+public class Enemy extends FloorObject implements Movable{
 
 	public Enemy(Floor floor) {
 		super(floor, "ENEMY");
@@ -13,4 +13,5 @@ public class Enemy extends FloorObject{
 		return false;
 	}
 
+	
 }

@@ -51,6 +51,8 @@ public class Floor {
 	
 	public boolean moveObjectTo(FloorObject o,int x,int y)
 	{
+		if(!(o instanceof Movable)){ return false;}
+		
 		//Is the location occupied by another object
 		if(grid[x][y]== null){
 			grid[o.getX()][o.getY()]=null; // Remove from previous location			
@@ -60,7 +62,7 @@ public class Floor {
 			return true;
 		}else{
 			//Moved to occupied space, what to do with it? Callback
-			return o.movedToGridOccupiedBy(grid[x][y]);
+			return ((Movable)o).movedToGridOccupiedBy(grid[x][y]);
 		}		
 	}	
 		

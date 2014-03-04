@@ -23,10 +23,6 @@ public class Bomb extends FloorObject {
 		return player;
 	}
 
-	@Override
-	public boolean movedToGridOccupiedBy(FloorObject o) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	
 
 }
