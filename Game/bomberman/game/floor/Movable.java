@@ -1,5 +1,7 @@
 package bomberman.game.floor;
 
+import bomberman.game.floor.Floor.Tile;
+
 public interface Movable {
 	
 	/**
@@ -7,6 +9,6 @@ public interface Movable {
 	 * @param o
 	 * @return canAdvance
 	 */
-	public boolean movedToGridOccupiedBy(FloorObject o);
+	public boolean movedToOccupiedGrid(Tile loc);
 
 }

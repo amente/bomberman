@@ -10,13 +10,16 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
 
-public class Main extends BasicGame{
+import bomberman.game.GameResolver;
+
+public class Game extends BasicGame{
 
 	private TiledMap map;
+	private GameResolver resolver;
 	private Animation sprite,up,down,left,right;
 	private float x = 64f, y = 52f;
 	
-    public Main()
+    public Game()
     {
         super("Bomberman");      
     }
@@ -45,8 +48,7 @@ public class Main extends BasicGame{
         {
             sprite = up;
             
-                sprite.update(delta);
-                // The lower the delta the slowest the sprite will animate.
+                sprite.update(delta);                
                 y -= delta * 0.1f;
             
         }
@@ -64,6 +66,7 @@ public class Main extends BasicGame{
            
                 sprite.update(delta);
                 x -= delta * 0.1f;
+                
            
         }
         else if (input.isKeyDown(Input.KEY_RIGHT))
@@ -83,9 +86,9 @@ public class Main extends BasicGame{
     {
         try
         {
-        	Main main = new Main();
-            AppGameContainer app = new AppGameContainer(main);
-            
+        	Game main = new Game();
+            AppGameContainer app = new AppGameContainer(main);  
+            app.setShowFPS(false);
             app.setDisplayMode(960, 780, false);            
             app.start();
             

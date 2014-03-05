@@ -12,7 +12,7 @@ public class GameResolver extends Thread{
 	
 	public GameResolver(GameServer gameServer){
 		
-		gameFloor = new Floor("Resources/bomberman_floor_1.tmx");		
+		gameFloor = new Floor();		
 		this.gameServer = gameServer;
 	}	
 	
@@ -86,8 +86,8 @@ public class GameResolver extends Thread{
 
 	private void processJoinAction(GameAction action) {
 		// TODO Auto-generated method stub
-		// Get the name of the player from action paramters
-		// Get the type of request JOIN or LEAVE from paramters
+		// Get the name of the player from action parameters
+		// Get the type of request JOIN or LEAVE from parameters
 		// Create a Player and place it on the floor
 		String playerName = action.getParameter("PLAYER");
 		Player player = new Player(gameFloor, playerName);
@@ -103,21 +103,22 @@ public class GameResolver extends Thread{
 		// Invoke the move on the floor
 		String playerName = action.getParameter("PLAYER");
 		
-		Player player = gameFloor.getPlayerByName(playerName);
+		Player player = gameFloor.getPlayer(playerName);
 		if (player == null) {
 			System.out.println("Player: " + playerName + " not found");
+		}else{
+		
+			String direction = action.getParameter("DIR");
+		
+			if (direction.equals("UP")) {
+				player.moveUp();
+			} else if (direction.equals("DOWN")) {
+				player.moveDown();
+			} else if (direction.equals("LEFT")) {
+				player.moveLeft();
+			} else if (direction.equals("RIGHT")) {
+				player.moveRight();
 		}
-		
-		String direction = action.getParameter("DIR");
-		
-		if (direction.equals("UP")) {
-			player.moveUp();
-		} else if (direction.equals("DOWN")) {
-			player.moveDown();
-		} else if (direction.equals("LEFT")) {
-			player.moveLeft();
-		} else if (direction.equals("RIGHT")) {
-			player.moveRight();
 		}
 	}
 	

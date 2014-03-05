@@ -1,8 +1,8 @@
 package bomberman.game.floor;
 
-public class Block extends FloorObject {
+public class Brick extends FloorObject {
 
-	public Block(Floor floor) {
+	public Brick(Floor floor) {
 		super(floor, "BLOCK");
 		// TODO Auto-generated constructor stub
 	}
