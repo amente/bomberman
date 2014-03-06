@@ -1,6 +1,9 @@
 package bomberman.game.floor;
 
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -24,7 +27,8 @@ public class Floor {
 	
 	public static final String EMPTYNAME = "_"; // String representation of an empty floor grid
 	
-	private HashMap<String,Player>  players;
+	private HashMap<SocketAddress,Player>  players;
+	private Player hostPlayer;
 	private ArrayList<Tile> emptyTiles = new ArrayList<Tile>() ;
 	
 	private Tile[][] tiles;
@@ -34,14 +38,15 @@ public class Floor {
 	
 	Random rand = new Random();
 	
-	public Floor(){	
-		initialize();
+	public Floor(){		
+		initialize();		
 	}	
 	
 	private void initialize(){
 		loadStateFromTmxFile("Resources/bomberman_floor_1.tmx");
 		xSize = tiles[0].length;
 		ySize = tiles.length;
+		players = new HashMap<SocketAddress,Player>();
 	}
 	
 	public boolean moveObjectTo(FloorObject o,int x,int y)
@@ -91,10 +96,10 @@ public class Floor {
 	 * Adds a player to the floor, it picks up a random empty location
 	 * @param player
 	 */
-	public void addPlayer(Player player) {
+	public String addPlayer(SocketAddress playerAddress) {
 		// Pop the next empy tile
-		Tile t = emptyTiles.remove(rand.nextInt(emptyTiles.size()-1));
-		addPlayer(player,t.x,t.y);
+		Tile t = emptyTiles.remove(rand.nextInt(emptyTiles.size()));
+		return addPlayer(playerAddress,t.x,t.y);
 	}
 	
 	/**
@@ -102,8 +107,8 @@ public class Floor {
 	 * @param name
 	 * @return
 	 */
-	public Player getPlayer(String name){
-		return players.get(name);
+	public Player getPlayer(SocketAddress addr){
+		return players.get(addr);
 	}
 	
 	/**
@@ -112,18 +117,19 @@ public class Floor {
 	 * @param x
 	 * @param y
 	 */
-	private void addPlayer(Player player, int x, int y) {
-		if (players.containsKey(player.getName())){
-			System.out.println("Player with name already in game");
-			return;
+	private String addPlayer(SocketAddress playerAddress,int x, int y) {
+		
+		if (players.containsKey(playerAddress)){
+			System.out.println(players.get(playerAddress).getName()+ " already in game");
+			return null;
 		}
-		
-		players.put(player.getName(),player);
-		
-		System.out.println("Adding player: " + player.getName());
-		
+		Player player = new Player(this,createUniquePlayerID());
+		player.setAddress(playerAddress);
+		players.put(player.getAddress(), player);
+				
+		System.out.println("Placing " + player.getName()+ " on Floor at "+x+","+y);		
 		placeNewObjectAt(player,x,y);
-		
+		return player.getName();
 	}
 	
 	/**
@@ -132,8 +138,33 @@ public class Floor {
 	 */
 	public void loadStateFromTmxFile(String filePath){
 		
+		/*
+		 * A workaround to invoking private method from TiledMap class
+		 */
+		try {
+			Method pvtMethod  = TiledMap.class.getDeclaredMethod("setHeadless",Boolean.TYPE);
+			pvtMethod.setAccessible(true);
+			pvtMethod.invoke(null, true);
+		} catch (NoSuchMethodException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (SecurityException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		try {
 			map  = new TiledMap(filePath);
+			
 			
 		} catch (SlickException e) {
 			// TODO Auto-generated catch block
@@ -151,15 +182,16 @@ public class Floor {
                  int tileID = map.getTileId(xAxis, yAxis, 0);
                  String value = map.getTileProperty(tileID, "type", "none");                 
 
- 				if(value.equalsIgnoreCase("block")){					
+ 				if(value.equalsIgnoreCase("brick")){					
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Brick(this)); 					
  				}else if(value.equalsIgnoreCase("door")){
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Door(this));					
  				} else if(value.equalsIgnoreCase("wall")){
- 					emptyTiles.add(new Tile(xAxis,yAxis,new Wall(this)));					
+ 					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Wall(this));					
  				}else if(value.equalsIgnoreCase("enemy")){
- 					emptyTiles.add(new Tile(xAxis,yAxis,new Enemy(this)));					
+ 					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Enemy(this));					
  				}else if(value.equalsIgnoreCase("empty")){
+ 					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,null);
  					emptyTiles.add(new Tile(xAxis,yAxis,null));					
  				}
                  
@@ -174,6 +206,9 @@ public class Floor {
 		
 	}
 		
+	public String createUniquePlayerID(){		
+		return "Player"+(players.size()+1);		
+	}
 	
 	/**
 	 * 
@@ -191,7 +226,10 @@ public class Floor {
 			Tile(int x, int y,FloorObject o){				
 				this.x = x;
 				this.y = y;
-				objects.add(o);
+				objects = new LinkedList<FloorObject>();
+				if(o!=null){
+					objects.add(o);
+				}
 			}	
 			
 			/**
@@ -207,7 +245,9 @@ public class Floor {
 			 * @param o
 			 */
 			public void replaceObject(FloorObject o){
-				objects.remove();
+				if(objects.size()>0){
+					objects.remove();
+				}
 				objects.addFirst(o);
 			}
 			
@@ -231,6 +271,19 @@ public class Floor {
 	
 	public TiledMap getMap(){
 		return map;
+	}
+
+	public SocketAddress[] getAddressOfAllPlayers() {
+		// TODO Auto-generated method stub
+		return (SocketAddress[]) players.keySet().toArray();
+	}
+
+	public Player getHostPlayer() {
+		return hostPlayer;
+	}
+
+	public void setHostPlayer(Player hostPlayer) {
+		this.hostPlayer = hostPlayer;
 	}	
 	
 }

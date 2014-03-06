@@ -1,7 +1,0 @@
-Join Player1
-Join Player2
-Game START_GAME
-Move UP Player1
-Move DOWN Player2
-Move DOWN Player1
-Game END_GAME

@@ -22,20 +22,15 @@ public class Application {
 		
 		int listenPort = Integer.parseInt(args[0]);							
 		
-		GameServer server = new GameServer(listenPort);
-		GameResolver gameResolver = new GameResolver(server);
+		GameServer gameServer = new GameServer(listenPort);		
+		GameResolver gameResolver = new GameResolver(gameServer);
+		JoinResolver joinResolver = new JoinResolver(gameResolver,gameServer);
 
-		Logger logger = new Logger();
-		new Thread(logger).start();
-		
-		
-		server.setLogger(logger);				
-		server.start();
-		
-		gameResolver.setLogger(logger);
-		gameResolver.start();
-		
-	    	    
+		System.out.println("Creating Game: Success");
+		gameServer.listenForJoin(joinResolver);
+				
+		//gameServer.start();
+		//gameResolver.start();	    	    
 					
 	}	
 	

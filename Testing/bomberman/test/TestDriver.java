@@ -4,67 +4,108 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.UnknownHostException;
 
-import bomberman.game.UDPWrapper;
+import bomberman.game.network.NetworkAddress;
+import bomberman.game.network.NetworkManager;
 
 public class TestDriver {
 	public static void main(String args[]) {
 		if (args.length != 2) {
-			System.out.println("usage: java TestDriver <ip-address> <port>");
+			System.out.println("usage: java TestDriver <serverAddress> <serverPort>");
 			System.exit(1);
 		}
 		
-
-	
-		int port = Integer.parseInt(args[1]);
-		String address = args[0];
-
+        TestDriver driver = new TestDriver();
 		
-		UDPWrapper udpWrapper = new UDPWrapper();
+	    String serverAddress = args[0];
+		int serverPort = Integer.parseInt(args[1]);
+				
+		File p1File = new File("Testing/Resources/player1.txt");
+		File p2File = new File("Testing/Resources/player2.txt");
 		
-		/*udpWrapper.sendSynchronous(
-			Player.Controls.START_GAME + Application.MESSAGE_DELIMITER,
-			port, 
-			address
-		);*/
 		
-		List<String> readLines = new ArrayList<String>();
-		File file = new File("Resources/test_driver.txt");
-		BufferedReader reader = null;
-
+		Player player1 = driver.new Player(p1File,serverPort,serverAddress);
+		Player player2 = driver.new Player(p2File,serverPort,serverAddress);
+		
+		player1.start();
+		player2.start();
+		
 		try {
-		    reader = new BufferedReader(new FileReader(file));
-		    String text = null;
-
-		    while ((text = reader.readLine()) != null) {
-		    	readLines.add(text);
-		    }
-		} catch (IOException e) {
-		    e.printStackTrace();
-		} finally {
-		    try {
-		        if (reader != null) {
-		            reader.close();
-		        }
-		    } catch (IOException e) {}
+			player1.join();
+			player2.join();
+		} catch (InterruptedException e) {
+			player1.interrupt();
+			player2.interrupt();
+			e.printStackTrace();
 		}
 		
-		boolean started = false;
-		for(String line : readLines) {
-			String[] lineArr = line.split(" ");
-			
-			if (lineArr[1].equals("START_GAME") || lineArr[0].equals("Join")){
-				udpWrapper.sendSynchronous(line, port, address);
-				if (lineArr[1].equals("START_GAME")) {
-					started = true;
+		
+	}
+	
+	public class Player extends Thread{
+		
+		BufferedReader reader;
+		NetworkManager networkManager;
+		private int serverPort;
+		private String serverAddress;
+				
+		Player(File testFile,int serverPort,String serverAddress){
+			try {
+			    reader = new BufferedReader(new FileReader(testFile));
+			    networkManager = new NetworkManager();
+			    this.serverAddress = serverAddress;
+			    this.serverPort = serverPort;			  
+			} catch (IOException e) {
+			    e.printStackTrace();
+			}			
+		}		
+		
+		@Override
+		public void run(){			
+			String message = null;
+			try {
+				while((message = reader.readLine()) != null){
+					
+					String[] lineArr = message.split(" ");			
+					if (lineArr[0].equals("Game")){
+						try {
+							System.out.println("Sending Join Message...");
+							String playerID = networkManager.sendSynchronous(message.trim(),new NetworkAddress(serverAddress,serverPort),null,3,300,false);
+							System.out.println("Joining Game: "+ (playerID!=null?("Success "+playerID):"Fail"));
+						} catch (UnknownHostException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}				
+					} 					
+					
+					//Send the messages every 100 milliseconds
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					if(this.isInterrupted()){
+						reader.close();
+						break;
+					}
 				}
-			} else {
-				if (!started) { continue; }
-				udpWrapper.sendAsynchronous(line, port, address);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			try {
+				reader.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		
 	}
+	
+	
 }

@@ -1,8 +1,10 @@
 package bomberman.game;
 
 import java.net.DatagramPacket;
+import java.net.SocketAddress;
+import java.net.SocketException;
 
-import bomberman.utils.buffer.Consumer;
+import bomberman.game.network.NetworkManager;
 import bomberman.utils.buffer.IBuffer;
 import bomberman.utils.buffer.Producer;
 import bomberman.utils.buffer.SingleBuffer;
@@ -10,81 +12,74 @@ import bomberman.utils.buffer.SingleBuffer;
 
 public class GameServer extends Thread {
 	
-	private UDPWrapper udpWrapper;
-	private boolean isStopped = false;
-	private boolean gameSetup = false;
-	private Logger logger = null;
+	private NetworkManager networkManager;
+	private boolean isStopped = false;	
+	private boolean gameFinished = false;
+	private boolean gameStarted = false;
+		
+	private IBuffer<DatagramPacket> messageBuffer; // Thread safe FIFO Queue
+	private Producer<DatagramPacket> producer;
 	
-	private IBuffer<String> messageBuffer; // Thread safe FIFO Queue
-	private Producer<String> producer;
-	public Consumer<String> consumer;
-	
-	public void setLogger(Logger l){
-		logger = l;
-	}
-	
+		
 	public GameServer(int port){			
-		udpWrapper = new UDPWrapper(port, true);
-		messageBuffer = new SingleBuffer<String>(Application.QUEUE_CAPACITY);	
-		producer = new Producer<String>(messageBuffer);
-		consumer = new Consumer<String>(messageBuffer);
+		try {
+			networkManager = new NetworkManager(port);
+		} catch (SocketException e) {
+			System.out.println("Socket bind failed for game server!");
+		}
+		messageBuffer = new SingleBuffer<DatagramPacket>(Application.QUEUE_CAPACITY);	
+		producer = new Producer<DatagramPacket>(messageBuffer);
+		
 	}	
 	
-	public boolean setup(){
-		DatagramPacket packet = udpWrapper.receiveSynchronous();
-		
-		if (packet == null) { return false; }
-		
-		handleSetupMessage(packet);
-		
-		return true;
-	}
-	
-	private void handleSetupMessage(DatagramPacket packet) {
-		String message = udpWrapper.getPacketMessage(packet).trim();
-		String[] messageArr = message.split(" ");
-		if (messageArr[1].trim().equals("START_GAME")){
-			gameSetup = true;
-			if (logger != null) { logger.addToLog(message); }
-		} else if (messageArr[0].trim().equals("Join")){
-			producer.produce(message);
+	public void listenForJoin(JoinResolver r){
+		System.out.println("Waiting for players to join ...");
+		while(!gameStarted ){
+			networkManager.receiveSynchronous(0,1024,false,r);		
 		}
 	}
-
-	public boolean listen(){		
-		DatagramPacket packet = udpWrapper.receiveAsynchronous();
 		
-		if (packet == null) { return false; }
-		
-		String message = new String(packet.getData()).trim();
-		producer.produce(message);
-			
+	public boolean listenForGameCommands(){		
+		DatagramPacket packet = networkManager.receiveAsynchronous(0,true);		
+		producer.produce(packet);			
 		return true;
 	}
-	
+		
 	public boolean isRunning(){
 		return !isStopped;
 	}
 
 	@Override
-	public void run(){	
-		while(!gameIsSetup()){
-			setup();
+	public void run(){		
+		while(!gameFinished){
+			listenForGameCommands();
 		}
-		while(!isStopped){
-			listen();
-		}		
+		
 	}
-	
-	private boolean gameIsSetup() {
-		return gameSetup;
-	}
-	
-	
+			
 	public void stopGracefully(){
-		isStopped = true;	
-		gameSetup = true;
-		udpWrapper.interrupt();
+		isStopped = true;		
+		networkManager.close();
+	}
+	
+	public IBuffer<DatagramPacket> getMessageBuffer(){
+		return messageBuffer;
+	}
+		
+	public void setGameFinished(boolean gameFinished){
+		this.gameFinished = gameFinished;
+	}
+	
+	public void setGameStarted(boolean gameStarted){
+		this.gameStarted = gameStarted;
+	}
+			
+	public void broadCastStartGame(SocketAddress[] allPlayers) {
+				
+	}
+	
+	public void broadCastEndGame(SocketAddress[] allPlayers) {
+				
 	}
 	
 }

@@ -6,12 +6,12 @@
 	<classpathentry kind="src" path="GUI"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="Lib/slick.jar" sourcepath="/home/LABS/amentebullo/Downloads/slick"/>
+	<classpathentry kind="lib" path="Lib/slick.jar" sourcepath="C:/Users/Amente/Downloads/slick"/>
 	<classpathentry kind="lib" path="Lib/ibxm.jar"/>
 	<classpathentry kind="lib" path="Lib/lwjgl-2.9.1"/>
 	<classpathentry kind="lib" path="Lib/lwjgl.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Bomberman/Lib/lwjgl-2.9.1/native/linux"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Bomberman/Lib/lwjgl-2.9.1/native/windows"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>

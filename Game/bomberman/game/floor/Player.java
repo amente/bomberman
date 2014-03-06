@@ -1,11 +1,14 @@
 package bomberman.game.floor;
 
+import java.net.SocketAddress;
+
 import bomberman.game.floor.Floor.Tile;
 
 
 public class Player extends FloorObject implements Movable {
 
 	private boolean isHost;
+	private SocketAddress addr;
 	
 	public Player(Floor floor, String name) {
 		super(floor, name);
@@ -24,6 +27,14 @@ public class Player extends FloorObject implements Movable {
 	
 	public boolean isHost(){
 		return isHost;
+	}
+
+	public SocketAddress getAddress() {
+		return addr;
+	}
+
+	public void setAddress(SocketAddress addr) {
+		this.addr = addr;
 	}
 	
 	

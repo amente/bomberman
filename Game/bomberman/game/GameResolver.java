@@ -1,60 +1,53 @@
 package bomberman.game;
 
+import java.net.DatagramPacket;
+
 import bomberman.game.floor.Floor;
 import bomberman.game.floor.Player;
-
+import bomberman.utils.buffer.Consumer;
+import bomberman.utils.buffer.IBuffer;
 
 public class GameResolver extends Thread{
 	
-	static Floor gameFloor;	
-	GameServer gameServer;
-	private Logger logger;
-	
+	private Floor gameFloor;
+	GameServer gameServer;	
+	private IBuffer<DatagramPacket> messageBuffer;
+	private Consumer<DatagramPacket> consumer;
+		
 	public GameResolver(GameServer gameServer){
 		
 		gameFloor = new Floor();		
 		this.gameServer = gameServer;
+		messageBuffer = gameServer.getMessageBuffer();
+		consumer = new Consumer<DatagramPacket>(messageBuffer);
 	}	
-	
-	public void setLogger(Logger l){
-		logger = l;
-	}
-	
-		
+			
 	@Override
 	public void run(){
 		
 		while(gameServer.isRunning()){
 			processMessages();
-		}
-		
-	}
+		}		
+	}	
 	
 	/**
 	 * Remove messages from the server queue and process them
 	 */
-	private void processMessages(){
+	private void processMessages(){		
+		DatagramPacket packet  =  consumer.consume();
 		
-		//This is critical call, but the ArrayBlockingQueue is thread safe
-		String message = gameServer.consumer.consume();
 		
-		if(message!=null){
-			GameAction action = GameProtocol.getInstance().getAction(message);			
-			
-			if (logger != null){
-				logger.addToLog(action.toString());
-			}
-			
+		if(packet!=null){
+			GameAction action = GameProtocol.getInstance().getAction(packet,gameFloor,false);			
+			if(action == null){return;}
+						
 			GameAction.Type t = action.getType();
 			
 			switch(t){		
 				
 			case MOVE:
 				processMoveAction(action);
-				break;
-			case JOIN_LEAVE:
-				processJoinAction(action);	
-				break;			
+				break;					
 			case BOMB:
 				processBombAction(action);
 				break;	
@@ -68,59 +61,49 @@ public class GameResolver extends Thread{
 	}
 
 	private void processGameAction(GameAction action) {
+		if(!(action.getType() == GameAction.Type.GAME)){return;}
+		
 		String type = action.getParameter("CALL");
 		
 		if (type.equals("END_GAME")) {
-			gameServer.stopGracefully();
-			logger.stopLogging();
+			gameServer.broadCastEndGame(gameFloor.getAddressOfAllPlayers());
+			gameServer.stopGracefully();			
 		}
 		
 	}
 
 	private void processBombAction(GameAction action) {
+		if(!(action.getType() == GameAction.Type.BOMB)){return;}
 		// TODO Apply the action
 		// Get the name of the player from action parameters
 		// Get the location the player on the board
 		// Get a bomb from the factory and put at the players location
 	}
-
-	private void processJoinAction(GameAction action) {
-		// TODO Auto-generated method stub
-		// Get the name of the player from action parameters
-		// Get the type of request JOIN or LEAVE from parameters
-		// Create a Player and place it on the floor
-		String playerName = action.getParameter("PLAYER");
-		Player player = new Player(gameFloor, playerName);
-		
-		gameFloor.addPlayer(player);
-	}
-
+	
 	private void processMoveAction(GameAction action) {
-		// TODO Auto-generated method stub
-		// Get the name of the player
-		// Locate the player on the board
-		// Get the movement type from action parameters
-		// Invoke the move on the floor
-		String playerName = action.getParameter("PLAYER");
-		
-		Player player = gameFloor.getPlayer(playerName);
+		if(!(action.getType() == GameAction.Type.MOVE)){return;}				
+		Player player = action.getPlayer();
 		if (player == null) {
-			System.out.println("Player: " + playerName + " not found");
-		}else{
-		
-			String direction = action.getParameter("DIR");
-		
-			if (direction.equals("UP")) {
-				player.moveUp();
-			} else if (direction.equals("DOWN")) {
-				player.moveDown();
-			} else if (direction.equals("LEFT")) {
-				player.moveLeft();
-			} else if (direction.equals("RIGHT")) {
-				player.moveRight();
+			return;
+		}		
+		String direction = action.getParameter("DIR");
+
+		if (direction.equals("UP")) {
+			player.moveUp();
+		} else if (direction.equals("DOWN")) {
+			player.moveDown();
+		} else if (direction.equals("LEFT")) {
+			player.moveLeft();
+		} else if (direction.equals("RIGHT")) {
+			player.moveRight();
 		}
-		}
+		
 	}
+
+	public Floor getGameFloor() {		
+		return gameFloor;
+	}
+
 	
 	
 	

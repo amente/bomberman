@@ -2,10 +2,11 @@ package bomberman.game;
 
 import java.util.HashMap;
 
+import bomberman.game.floor.Player;
+
 public class GameAction {
 	
 	public enum Type{		
-		JOIN_LEAVE,
 		MOVE,
 		BOMB, 
 		GAME		
@@ -14,6 +15,7 @@ public class GameAction {
 		
 	private Type type;
 	private HashMap<String,String> parameters;
+	private Player player;
 	
 	public GameAction(){
 		parameters = new HashMap<String,String>(3);	
@@ -44,5 +46,13 @@ public class GameAction {
 		}
 		
 		return s;
+	}
+
+	public Player getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(Player player) {
+		this.player = player;
 	}
 }
