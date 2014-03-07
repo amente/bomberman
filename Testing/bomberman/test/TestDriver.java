@@ -24,8 +24,8 @@ public class TestDriver {
 		File p2File = new File("Testing/Resources/player2.txt");
 		
 		
-		Player player1 = driver.new Player(p1File,serverPort,serverAddress);
-		Player player2 = driver.new Player(p2File,serverPort,serverAddress);
+		TestPlayer player1 = driver.new TestPlayer(p1File,serverPort,serverAddress);
+		TestPlayer player2 = driver.new TestPlayer(p2File,serverPort,serverAddress);
 		
 		
 		String player1ID = player1.sendJoin();
@@ -75,13 +75,13 @@ public class TestDriver {
 		
 	}
 	
-	public class Player extends Thread{
+	public class TestPlayer extends Thread{
 		
 		BufferedReader reader;
 		NetworkManager networkManager;		
 		private NetworkAddress serverAddress;
 						
-		Player(File testFile,int serverPort,String serverAddress){
+		TestPlayer(File testFile,int serverPort,String serverAddress){
 			try {
 			    reader = new BufferedReader(new FileReader(testFile));
 			    networkManager = new NetworkManager();
@@ -139,6 +139,11 @@ public class TestDriver {
 		}
 		
 	}
+	
+	
+	
+	
+	
 	
 	
 }
