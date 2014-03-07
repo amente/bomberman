@@ -34,25 +34,20 @@ public class FloorObject{
 		this.y = y;
 	}	
 	
-	public void moveLeft(){			
-		System.out.println("Moving object: " + name + " left.");
-		floor.moveObjectTo(this,x++,y);
+	public void moveLeft(){		
+		floor.moveObjectTo(this,x+1,y);
 	}	
 	
-	public void moveRight(){			
-		System.out.println("Moving object: " + name + " right.");
-		floor.moveObjectTo(this,x--,y);
+	public void moveRight(){		
+		floor.moveObjectTo(this,x-1,y);
 	}	
 	
-	public void moveUp(){			
-		System.out.println("Moving object: " + name + " up.");
-		floor.moveObjectTo(this,x,y++);
+	public void moveUp(){		
+		floor.moveObjectTo(this,x,y+1);
 	}	
 	
-	public void moveDown(){			
-		System.out.println("Moving object: " + name + " down.");
-		floor.moveObjectTo(this,x,y--);
-	}		
-				
+	public void moveDown(){		
+		floor.moveObjectTo(this,x,y-1);
+	}				
 	
 }	

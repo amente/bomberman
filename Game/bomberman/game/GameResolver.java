@@ -81,20 +81,24 @@ public class GameResolver extends Thread{
 	}
 	
 	private void processMoveAction(GameAction action) {
-		if(!(action.getType() == GameAction.Type.MOVE)){return;}				
-		Player player = action.getPlayer();
+		if(action.getType() != GameAction.Type.MOVE){return;}	
+		Player player = null;
+		if(gameFloor.hasPlayer(action.getSenderAddress())){
+			player = gameFloor.getPlayer(action.getSenderAddress());
+		}
+		
 		if (player == null) {
 			return;
 		}		
 		String direction = action.getParameter("DIR");
 
-		if (direction.equals("UP")) {
+		if (direction.equalsIgnoreCase("UP")) {
 			player.moveUp();
-		} else if (direction.equals("DOWN")) {
+		} else if (direction.equalsIgnoreCase("DOWN")) {
 			player.moveDown();
-		} else if (direction.equals("LEFT")) {
+		} else if (direction.equalsIgnoreCase("LEFT")) {
 			player.moveLeft();
-		} else if (direction.equals("RIGHT")) {
+		} else if (direction.equalsIgnoreCase("RIGHT")) {
 			player.moveRight();
 		}
 		

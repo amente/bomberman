@@ -15,5 +15,11 @@ public class Enemy extends FloorObject implements Movable{
 		return false;
 	}
 
+	@Override
+	public boolean movedOutOfGrid() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	
 }

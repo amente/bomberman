@@ -69,5 +69,46 @@ public class NetworkAddress{
 		this.socketAddr = socketAddr;
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((inetAddr == null) ? 0 : inetAddr.hashCode());
+		result = prime * result + (isInetAddress ? 1231 : 1237);
+		result = prime * result + (isSocketAddress ? 1231 : 1237);
+		result = prime * result + port;
+		result = prime * result
+				+ ((socketAddr == null) ? 0 : socketAddr.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		NetworkAddress other = (NetworkAddress) obj;
+		if (inetAddr == null) {
+			if (other.inetAddr != null)
+				return false;
+		} else if (!inetAddr.equals(other.inetAddr))
+			return false;
+		if (isInetAddress != other.isInetAddress)
+			return false;
+		if (isSocketAddress != other.isSocketAddress)
+			return false;
+		if (port != other.port)
+			return false;
+		if (socketAddr == null) {
+			if (other.socketAddr != null)
+				return false;
+		} else if (!socketAddr.equals(other.socketAddr))
+			return false;
+		return true;
+	}
 	
 }

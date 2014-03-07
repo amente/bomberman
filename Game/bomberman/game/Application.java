@@ -28,9 +28,11 @@ public class Application {
 
 		System.out.println("Creating Game: Success");
 		gameServer.listenForJoin(joinResolver);
-				
-		//gameServer.start();
-		//gameResolver.start();	    	    
+		
+		
+		System.out.println("Game Started!");
+		gameServer.start();
+		gameResolver.start();	    	    
 					
 	}	
 	

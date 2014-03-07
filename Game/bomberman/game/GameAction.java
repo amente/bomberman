@@ -2,7 +2,7 @@ package bomberman.game;
 
 import java.util.HashMap;
 
-import bomberman.game.floor.Player;
+import bomberman.game.network.NetworkAddress;
 
 public class GameAction {
 	
@@ -14,8 +14,8 @@ public class GameAction {
 	
 		
 	private Type type;
-	private HashMap<String,String> parameters;
-	private Player player;
+	private HashMap<String,String> parameters;	
+	private NetworkAddress senderAddress = null;
 	
 	public GameAction(){
 		parameters = new HashMap<String,String>(3);	
@@ -48,11 +48,11 @@ public class GameAction {
 		return s;
 	}
 
-	public Player getPlayer() {
-		return player;
+	public NetworkAddress getSenderAddress(){
+		return senderAddress;
 	}
 
-	public void setPlayer(Player player) {
-		this.player = player;
+	public void setSenderAddress(NetworkAddress networkAddress) {
+		this.senderAddress  = networkAddress;		
 	}
 }

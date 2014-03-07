@@ -1,14 +1,13 @@
 package bomberman.game.floor;
 
-import java.net.SocketAddress;
-
 import bomberman.game.floor.Floor.Tile;
+import bomberman.game.network.NetworkAddress;
 
 
 public class Player extends FloorObject implements Movable {
 
 	private boolean isHost;
-	private SocketAddress addr;
+	private NetworkAddress addr;
 	
 	public Player(Floor floor, String name) {
 		super(floor, name);
@@ -17,7 +16,9 @@ public class Player extends FloorObject implements Movable {
 
 	@Override
 	public boolean movedToOccupiedGrid(Tile loc) {
-		// TODO Auto-generated method stub
+		
+		System.out.println(getName()+ " moved to space occupied by "+ loc.getObject().getName());
+		
 		return false;
 	}
 
@@ -29,13 +30,22 @@ public class Player extends FloorObject implements Movable {
 		return isHost;
 	}
 
-	public SocketAddress getAddress() {
+	public NetworkAddress getAddress() {
 		return addr;
 	}
 
-	public void setAddress(SocketAddress addr) {
+	public void setAddress(NetworkAddress addr) {
 		this.addr = addr;
 	}
 	
+	public String toString(){
+		return getName();
+	}
+
+	@Override
+	public boolean movedOutOfGrid() {
+		System.out.println(getName()+ " moved out of grid "+ getX()+ "," +getY());
+		return false;
+	}
 	
 }

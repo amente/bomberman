@@ -3,6 +3,7 @@ package bomberman.game;
 import java.net.DatagramPacket;
 
 import bomberman.game.floor.Floor;
+import bomberman.game.network.NetworkAddress;
 
 /**
  * 
@@ -37,29 +38,38 @@ public class GameProtocol {
 		return theProtocol;
 	}	
 	
-	public GameAction getAction(DatagramPacket packet,Floor floor,boolean joinOnly){	
+	public GameAction getAction(DatagramPacket packet,Floor floor,boolean gameOnly){	
 		// TODO: Parse the message according to the protocol and make an action
-		String message = new String(packet.getData(),packet.getOffset(),packet.getLength());		
+		String message = new String(packet.getData(),packet.getOffset(),packet.getLength());
+		NetworkAddress senderAddress = new NetworkAddress(packet.getSocketAddress());
 		String[] params = message.split(" ", 2);
 		if(params.length < 1) { return null;}
 		
 		GameAction action = null;
 		
-		// For join only messages we don't need to check for player
-		if (joinOnly) {
-			if (params[0].equalsIgnoreCase("Game")
-					&& params[1].equalsIgnoreCase("JOIN")) {
-				action = new GameAction();
-				action.setType(GameAction.Type.GAME);
-				action.addParameter("CALL", "JOIN");
-			} else {
-				return null;
-			}
+		// For game messages we don't need to check for player
+		if (gameOnly) {
+			if (params[0].equalsIgnoreCase("Game")){
+					if(params[1].equalsIgnoreCase("JOIN")) {
+						action = new GameAction();
+						action.setType(GameAction.Type.GAME);
+						action.addParameter("CALL", "JOIN");
+						action.setSenderAddress(senderAddress);
+					}else if(params[1].equalsIgnoreCase("START")){
+						action = new GameAction();
+						action.setType(GameAction.Type.GAME);
+						action.addParameter("CALL", "START");
+						action.setSenderAddress(senderAddress);
+					}					
+			} 		
+		
+			return action;
+			
 		} else {
-
+			
 			// For all other messages, packets are ignored if player is not in
 			// the game
-			if (!senderHasJoinedGame(packet, floor)) {
+			if (!senderHasJoinedGame(senderAddress, floor)) {
 				return null;
 			}
 
@@ -70,38 +80,27 @@ public class GameProtocol {
 				action = new GameAction();
 				action.setType(GameAction.Type.MOVE);
 				action.addParameter("DIR", params[1]);
-				action.addParameter("PLAYER", params[2]);
+				
 
 			} else if (params[0].equalsIgnoreCase("BOMB")) {
 				action = new GameAction();
 				action.setType(GameAction.Type.BOMB);
-				action.addParameter("PLAYER", params[0]);
-
-			} else if (params[0].equalsIgnoreCase("Game")) {
-				if (params.length != 2) {
-					return null;
-				}
-
-				action = new GameAction();
-				action.setType(GameAction.Type.GAME);
-				action.addParameter("TYPE", params[0]);
-
-				if (params[1].trim().equals("END_GAME")) {
-					action.addParameter("CALL", params[1].trim());
-				}
+				
 			}
-		}
+			
+			//Bind action to sender address
+			action.setSenderAddress(senderAddress);			
+			return action;
+			
+		}		
 		
-		//Bind action to player 
-		action.setPlayer(floor.getPlayer(packet.getSocketAddress()));
-		return action;
 	}
 
 
 
-	private boolean senderHasJoinedGame(DatagramPacket packet, Floor floor) {
+	private boolean senderHasJoinedGame(NetworkAddress senderAddress, Floor floor) {
 		//Extract the sender player information from the packet and check if it has already joined the game
-		if(floor.getPlayer(packet.getSocketAddress())==null){
+		if(floor.getPlayer(senderAddress)==null){
 			return false;
 		}		
 		return true;

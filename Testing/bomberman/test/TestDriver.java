@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 import bomberman.game.network.NetworkAddress;
 import bomberman.game.network.NetworkManager;
@@ -28,7 +27,40 @@ public class TestDriver {
 		Player player1 = driver.new Player(p1File,serverPort,serverAddress);
 		Player player2 = driver.new Player(p2File,serverPort,serverAddress);
 		
+		
+		String player1ID = player1.sendJoin();
+		if(player1ID != null){
+			System.out.println(player1ID+ " Joining Game Success");
+		}else{
+			System.out.println("player1 joining game failed");
+			return;
+		}
+		
+			
+		String player2ID = player2.sendJoin();
+		if(player2ID != null){
+			System.out.println(player2ID+ " Joining Game Success");
+		}else{
+			System.out.println("player2 joining game failed");
+		}
+		
+		
+		
+		
+		System.out.println("Sending Start Message");
+		player1.sendStartGame();
+		
+		// Start sending move messages
 		player1.start();
+		// Let Player 1 get a head start so, he can be host
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} 
+		
+		// Start sending move messages 
 		player2.start();
 		
 		try {
@@ -46,42 +78,43 @@ public class TestDriver {
 	public class Player extends Thread{
 		
 		BufferedReader reader;
-		NetworkManager networkManager;
-		private int serverPort;
-		private String serverAddress;
-				
+		NetworkManager networkManager;		
+		private NetworkAddress serverAddress;
+						
 		Player(File testFile,int serverPort,String serverAddress){
 			try {
 			    reader = new BufferedReader(new FileReader(testFile));
 			    networkManager = new NetworkManager();
-			    this.serverAddress = serverAddress;
-			    this.serverPort = serverPort;			  
+			    this.serverAddress = new NetworkAddress(serverAddress,serverPort);			    			  
 			} catch (IOException e) {
 			    e.printStackTrace();
 			}			
 		}		
 		
+		
+		public String sendJoin(){	
+			System.out.println("Sending Join Message...");
+			return networkManager.sendSynchronous("Game Join",serverAddress,null,3,5000,false);			
+		}
+		
+		public void sendStartGame(){			
+			networkManager.sendAsynchronous("Game Start",serverAddress,false);			
+		}
+		
 		@Override
 		public void run(){			
-			String message = null;
+			String move = null;
 			try {
-				while((message = reader.readLine()) != null){
+				while((move = reader.readLine()) != null){
 					
-					String[] lineArr = message.split(" ");			
-					if (lineArr[0].equals("Game")){
-						try {
-							System.out.println("Sending Join Message...");
-							String playerID = networkManager.sendSynchronous(message.trim(),new NetworkAddress(serverAddress,serverPort),null,3,300,false);
-							System.out.println("Joining Game: "+ (playerID!=null?("Success "+playerID):"Fail"));
-						} catch (UnknownHostException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}				
-					} 					
-					
-					//Send the messages every 100 milliseconds
+					String[] lineArr = move.split(" ");			
+					if(lineArr[0].equalsIgnoreCase("Move")){						
+							System.out.println("Sending Move "+lineArr[1]);
+							networkManager.sendAsynchronous(move.trim(),serverAddress,true);					
+					}					
+					//Move every 1000 milliseconds
 					try {
-						Thread.sleep(100);
+						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

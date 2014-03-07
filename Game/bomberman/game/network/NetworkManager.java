@@ -23,7 +23,8 @@ public class NetworkManager {
 	
 	
 	public NetworkManager() throws SocketException{
-		socket = new DatagramSocket();		
+		socket = new DatagramSocket();	
+		initialize();
 	}
 	
 	/**
@@ -33,7 +34,14 @@ public class NetworkManager {
 	 */
 	public NetworkManager(int port) throws SocketException {		
 			socket = new DatagramSocket(port);		
+			initialize();
 	}
+	
+	private void initialize(){
+		sendCount = new HashMap<NetworkAddress,Integer>();
+		recieveCount = new HashMap<NetworkAddress,Integer>();
+	}
+	
 	/**
 	 * Send asynchronous message to receiver, does not wait ACK
 	 * @param message the message

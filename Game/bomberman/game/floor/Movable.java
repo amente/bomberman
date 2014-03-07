@@ -10,5 +10,6 @@ public interface Movable {
 	 * @return canAdvance
 	 */
 	public boolean movedToOccupiedGrid(Tile loc);
+	public boolean movedOutOfGrid();
 
 }

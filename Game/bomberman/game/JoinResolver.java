@@ -3,6 +3,7 @@ package bomberman.game;
 import java.net.DatagramPacket;
 
 import bomberman.game.floor.Floor;
+import bomberman.game.network.NetworkAddress;
 import bomberman.game.network.PacketProcessor;
 
 public class JoinResolver implements PacketProcessor {
@@ -28,14 +29,15 @@ public class JoinResolver implements PacketProcessor {
 				
 				if(param.equalsIgnoreCase("JOIN")){
 					
-					String playerName = gameFloor.addPlayer(packet.getSocketAddress());
+					String playerName = gameFloor.addPlayer(new NetworkAddress(packet.getSocketAddress()));
 					if(playerName!=null){
 						System.out.println(playerName+ " Joined");	
 						return playerName;
 					}  
 					
 				}else if(param.equalsIgnoreCase("START")){					
-					if(action.getPlayer()!=null && action.getPlayer()==gameFloor.getHostPlayer()){
+					if(gameFloor.getHostPlayer().getAddress().equals(action.getSenderAddress())){
+						gameServer.setGameStarted(true);
 						gameServer.broadCastStartGame(gameFloor.getAddressOfAllPlayers());
 					}					
 				}				

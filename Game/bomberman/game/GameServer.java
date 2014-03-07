@@ -1,9 +1,9 @@
 package bomberman.game;
 
 import java.net.DatagramPacket;
-import java.net.SocketAddress;
 import java.net.SocketException;
 
+import bomberman.game.network.NetworkAddress;
 import bomberman.game.network.NetworkManager;
 import bomberman.utils.buffer.IBuffer;
 import bomberman.utils.buffer.Producer;
@@ -74,11 +74,11 @@ public class GameServer extends Thread {
 		this.gameStarted = gameStarted;
 	}
 			
-	public void broadCastStartGame(SocketAddress[] allPlayers) {
+	public void broadCastStartGame(NetworkAddress[] allPlayers) {
 				
 	}
 	
-	public void broadCastEndGame(SocketAddress[] allPlayers) {
+	public void broadCastEndGame(NetworkAddress[] allPlayers) {
 				
 	}
 	

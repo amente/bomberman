@@ -3,7 +3,6 @@ package bomberman.game.floor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,6 +10,8 @@ import java.util.Random;
 
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
+
+import bomberman.game.network.NetworkAddress;
 
 
 /**
@@ -27,7 +28,7 @@ public class Floor {
 	
 	public static final String EMPTYNAME = "_"; // String representation of an empty floor grid
 	
-	private HashMap<SocketAddress,Player>  players;
+	private HashMap<NetworkAddress,Player>  players;
 	private Player hostPlayer;
 	private ArrayList<Tile> emptyTiles = new ArrayList<Tile>() ;
 	
@@ -46,14 +47,14 @@ public class Floor {
 		loadStateFromTmxFile("Resources/bomberman_floor_1.tmx");
 		xSize = tiles[0].length;
 		ySize = tiles.length;
-		players = new HashMap<SocketAddress,Player>();
+		players = new HashMap<NetworkAddress,Player>();
 	}
 	
 	public boolean moveObjectTo(FloorObject o,int x,int y)
 	{
 		// Check if movement is to location outside the floor
-		if(x>xSize-1 || y>ySize-1){ return false;}
-		
+		if(x>xSize-1 || y>ySize-1 || x<0 || y<0){ return ((Movable)o).movedOutOfGrid();}
+				
 		//Only a movable object can move
 		if(!(o instanceof Movable)){ return false;}
 		
@@ -64,6 +65,7 @@ public class Floor {
 			o.setLocationTo(x, y);
 			System.out.println("x: " + x + " y: " + y);
 			tiles[x][y].replaceObject(o); // Move to new location
+			System.out.println(o.getName()+" moved to "+x+","+y);
 			return true;
 		}else{
 			//Moved to occupied space, what to do with it? Callback
@@ -73,7 +75,8 @@ public class Floor {
 		
 	public void placeNewObjectAt(FloorObject o,int x,int y){		
 		if(tiles[x][y].getObject() == null){
-			tiles[x][y].replaceObject(o);			
+			tiles[x][y].replaceObject(o);	
+			o.setLocationTo(x, y);
 		}			
 	}
 	
@@ -96,18 +99,18 @@ public class Floor {
 	 * Adds a player to the floor, it picks up a random empty location
 	 * @param player
 	 */
-	public String addPlayer(SocketAddress playerAddress) {
+	public String addPlayer(NetworkAddress playerAddress) {
 		// Pop the next empy tile
 		Tile t = emptyTiles.remove(rand.nextInt(emptyTiles.size()));
 		return addPlayer(playerAddress,t.x,t.y);
 	}
 	
 	/**
-	 * Locates a player on the floor by its name
-	 * @param name
+	 * Locates a player on the floor by its address
+	 * @param addr
 	 * @return
 	 */
-	public Player getPlayer(SocketAddress addr){
+	public Player getPlayer(NetworkAddress addr){
 		return players.get(addr);
 	}
 	
@@ -117,7 +120,7 @@ public class Floor {
 	 * @param x
 	 * @param y
 	 */
-	private String addPlayer(SocketAddress playerAddress,int x, int y) {
+	private String addPlayer(NetworkAddress playerAddress,int x, int y) {
 		
 		if (players.containsKey(playerAddress)){
 			System.out.println(players.get(playerAddress).getName()+ " already in game");
@@ -125,6 +128,11 @@ public class Floor {
 		}
 		Player player = new Player(this,createUniquePlayerID());
 		player.setAddress(playerAddress);
+		
+		if(players.size() == 0){
+			hostPlayer = player;
+		}
+		
 		players.put(player.getAddress(), player);
 				
 		System.out.println("Placing " + player.getName()+ " on Floor at "+x+","+y);		
@@ -273,9 +281,9 @@ public class Floor {
 		return map;
 	}
 
-	public SocketAddress[] getAddressOfAllPlayers() {
+	public NetworkAddress[] getAddressOfAllPlayers() {
 		// TODO Auto-generated method stub
-		return (SocketAddress[]) players.keySet().toArray();
+		return players.keySet().toArray(new NetworkAddress[0]);
 	}
 
 	public Player getHostPlayer() {
@@ -284,6 +292,10 @@ public class Floor {
 
 	public void setHostPlayer(Player hostPlayer) {
 		this.hostPlayer = hostPlayer;
+	}
+
+	public boolean hasPlayer(NetworkAddress senderAddress) {
+		return players.containsKey(senderAddress);
 	}	
 	
 }
