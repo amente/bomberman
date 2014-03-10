@@ -19,7 +19,7 @@ public class JoinResolver implements PacketProcessor {
 	public String process(DatagramPacket packet) {		
 		if(packet!=null){
 			Floor gameFloor = gameResolver.getGameFloor();
-			GameAction action = GameProtocol.getInstance().getAction(packet,gameFloor,true);			
+			GameAction action = GameProtocol.getInstance().getAction(packet);			
 			if(action == null){return null;}
 			
 						

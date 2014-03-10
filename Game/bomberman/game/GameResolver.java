@@ -1,11 +1,10 @@
 package bomberman.game;
 
-import java.net.DatagramPacket;
-
 import bomberman.game.floor.BombFactory;
 import bomberman.game.floor.BombScheduler;
 import bomberman.game.floor.Floor;
 import bomberman.game.floor.Player;
+import bomberman.game.network.NetworkAddress;
 import bomberman.utils.buffer.Consumer;
 import bomberman.utils.buffer.IBuffer;
 
@@ -15,8 +14,8 @@ public class GameResolver extends Thread{
 	private BombFactory bombFactory;
 	private BombScheduler bombScheduler;
 	GameServer gameServer;	
-	private IBuffer<DatagramPacket> messageBuffer;
-	private Consumer<DatagramPacket> consumer;
+	private IBuffer<GameAction> messageBuffer;
+	private Consumer<GameAction> consumer;
 		
 	public GameResolver(GameServer gameServer){
 		
@@ -26,7 +25,7 @@ public class GameResolver extends Thread{
 		bombScheduler.start();
 		this.gameServer = gameServer;
 		messageBuffer = gameServer.getMessageBuffer();
-		consumer = new Consumer<DatagramPacket>(messageBuffer);
+		consumer = new Consumer<GameAction>(messageBuffer);
 	}	
 			
 	@Override
@@ -41,29 +40,27 @@ public class GameResolver extends Thread{
 	 * Remove messages from the server queue and process them
 	 */
 	private void processMessages(){		
-		DatagramPacket packet  =  consumer.consume();
+		GameAction action  =  consumer.consume();	
+		if(action == null){return;}
 		
-		
-		if(packet!=null){
-			GameAction action = GameProtocol.getInstance().getAction(packet,gameFloor,false);			
-			if(action == null){return;}
-						
-			GameAction.Type t = action.getType();
-			
-			switch(t){		
-				
-			case MOVE:
-				processMoveAction(action);
-				break;					
-			case BOMB:
-				processBombAction(action);
-				break;	
-			case GAME:
-				processGameAction(action);
-				break;
-			}		
-			
+		if (!senderHasJoinedGame(action.getSenderAddress(), gameFloor)) {
+			return;
 		}		
+					
+		GameAction.Type t = action.getType();
+		
+		switch(t){		
+			
+		case MOVE:
+			processMoveAction(action);
+			break;					
+		case BOMB:
+			processBombAction(action);
+			break;	
+		case GAME:
+			processGameAction(action);
+			break;
+		}			
 		
 	}
 
@@ -122,7 +119,13 @@ public class GameResolver extends Thread{
 		return gameFloor;
 	}
 
-	
+	private boolean senderHasJoinedGame(NetworkAddress senderAddress, Floor floor) {
+		//Extract the sender player information from the packet and check if it has already joined the game
+		if(floor.getPlayer(senderAddress)==null){
+			return false;
+		}		
+		return true;
+	}	
 	
 	
 }		

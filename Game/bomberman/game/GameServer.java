@@ -17,8 +17,8 @@ public class GameServer extends Thread {
 	private boolean gameFinished = false;
 	private boolean gameStarted = false;
 		
-	private IBuffer<DatagramPacket> messageBuffer; // Thread safe FIFO Queue
-	private Producer<DatagramPacket> producer;
+	private IBuffer<GameAction> messageBuffer; // Thread safe FIFO Queue
+	private Producer<GameAction> producer;
 	
 		
 	public GameServer(int port){			
@@ -27,21 +27,24 @@ public class GameServer extends Thread {
 		} catch (SocketException e) {
 			System.out.println("Socket bind failed for game server!");
 		}
-		messageBuffer = new SingleBuffer<DatagramPacket>(Application.QUEUE_CAPACITY);	
-		producer = new Producer<DatagramPacket>(messageBuffer);
+		messageBuffer = new SingleBuffer<GameAction>(Application.QUEUE_CAPACITY);	
+		producer = new Producer<GameAction>(messageBuffer);
 		
 	}	
 	
 	public void listenForJoin(JoinResolver r){
 		System.out.println("Waiting for players to join ...");
 		while(!gameStarted ){
-			networkManager.receiveSynchronous(0,1024,false,r);		
+			networkManager.receiveSynchronous(0,1024,false,r);			
 		}
 	}
 		
 	public boolean listenForGameCommands(){		
 		DatagramPacket packet = networkManager.receiveAsynchronous(0,true);		
-		producer.produce(packet);			
+		
+		GameAction action = GameProtocol.getInstance().getAction(packet);		
+		
+		producer.produce(action);			
 		return true;
 	}
 		
@@ -62,7 +65,7 @@ public class GameServer extends Thread {
 		networkManager.close();
 	}
 	
-	public IBuffer<DatagramPacket> getMessageBuffer(){
+	public IBuffer<GameAction> getMessageBuffer(){
 		return messageBuffer;
 	}
 		
