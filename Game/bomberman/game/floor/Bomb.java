@@ -1,13 +1,19 @@
 package bomberman.game.floor;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class Bomb extends FloorObject {
 
 	
 	private Player player;
+	private Timer timer;
+	private Detonator detonator;
+	private Floor floor;
 	
 	public Bomb(Floor floor) {
 		super(floor, "BOMB");
-		// TODO Auto-generated constructor stub
+		this.floor = floor;	
 	}
 	
 	/**
@@ -23,6 +29,28 @@ public class Bomb extends FloorObject {
 		return player;
 	}
 
-	
+	public void setTimer(long time){
+		timer = new Timer();
+		detonator = new Detonator(this);
+		timer.schedule(detonator, time);
+	}
 
+	public void explode(){		
+		floor.explodeBomb(this);		
+	}
+	
+	private class Detonator extends TimerTask{
+
+		private Bomb bomb;
+		public Detonator(Bomb bomb){
+			this.bomb = bomb;
+		}
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			bomb.explode();
+		}
+		
+	}
+	
 }

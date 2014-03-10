@@ -140,6 +140,12 @@ public class Floor {
 		return player.getName();
 	}
 	
+	public void explodeBomb(Bomb bomb){		
+		System.out.println("Bomb Exploded"+" x:"+bomb.getX()+" y:"+bomb.getY());
+		
+		
+	}
+	
 	/**
 	 * Loads the initial state of the floor from a map(.tmx) file
 	 * @param filePath

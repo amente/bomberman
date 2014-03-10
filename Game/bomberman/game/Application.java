@@ -25,6 +25,8 @@ public class Application {
 		GameServer gameServer = new GameServer(listenPort);		
 		GameResolver gameResolver = new GameResolver(gameServer);
 		JoinResolver joinResolver = new JoinResolver(gameResolver,gameServer);
+		
+		
 
 		System.out.println("Creating Game: Success");
 		gameServer.listenForJoin(joinResolver);

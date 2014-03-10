@@ -2,6 +2,8 @@ package bomberman.game;
 
 import java.net.DatagramPacket;
 
+import bomberman.game.floor.BombFactory;
+import bomberman.game.floor.BombScheduler;
 import bomberman.game.floor.Floor;
 import bomberman.game.floor.Player;
 import bomberman.utils.buffer.Consumer;
@@ -10,13 +12,18 @@ import bomberman.utils.buffer.IBuffer;
 public class GameResolver extends Thread{
 	
 	private Floor gameFloor;
+	private BombFactory bombFactory;
+	private BombScheduler bombScheduler;
 	GameServer gameServer;	
 	private IBuffer<DatagramPacket> messageBuffer;
 	private Consumer<DatagramPacket> consumer;
 		
 	public GameResolver(GameServer gameServer){
 		
-		gameFloor = new Floor();		
+		gameFloor = new Floor();	
+		bombFactory  = new BombFactory();
+		bombScheduler = new BombScheduler(bombFactory,gameServer);
+		bombScheduler.start();
 		this.gameServer = gameServer;
 		messageBuffer = gameServer.getMessageBuffer();
 		consumer = new Consumer<DatagramPacket>(messageBuffer);
@@ -74,10 +81,17 @@ public class GameResolver extends Thread{
 
 	private void processBombAction(GameAction action) {
 		if(!(action.getType() == GameAction.Type.BOMB)){return;}
-		// TODO Apply the action
-		// Get the name of the player from action parameters
-		// Get the location the player on the board
-		// Get a bomb from the factory and put at the players location
+		
+		Player player = null;
+		if(gameFloor.hasPlayer(action.getSenderAddress())){
+			player = gameFloor.getPlayer(action.getSenderAddress());
+		}
+		
+		if (player == null) {
+			return;
+		}
+		
+		bombFactory.makeBombFor(player,gameFloor);			
 	}
 	
 	private void processMoveAction(GameAction action) {

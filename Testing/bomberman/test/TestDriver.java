@@ -103,16 +103,20 @@ public class TestDriver {
 		
 		@Override
 		public void run(){			
-			String move = null;
+			String cmd = null;
 			try {
-				while((move = reader.readLine()) != null){
+				while((cmd = reader.readLine()) != null){
 					
-					String[] lineArr = move.split(" ");			
+					String[] lineArr = cmd.split(" ");			
 					if(lineArr[0].equalsIgnoreCase("Move")){						
 							System.out.println("Sending Move "+lineArr[1]);
-							networkManager.sendAsynchronous(move.trim(),serverAddress,true);					
-					}					
-					//Move every 1000 milliseconds
+							networkManager.sendAsynchronous(cmd.trim(),serverAddress,true);					
+					}else if(lineArr[0].equalsIgnoreCase("Bomb")){
+						System.out.println("Sending Bomb");
+						networkManager.sendAsynchronous(cmd.trim(),serverAddress,true);
+					}
+					
+					//Send command every 1000 milliseconds
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {

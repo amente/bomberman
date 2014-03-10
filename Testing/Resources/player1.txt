@@ -13,11 +13,13 @@ Move Down
 Move Down
 Move Up
 Move Up
+Bomb
 Move Down
 Move Down
 Move Down
 Move Down
 Move Down
+Bomb
 Move Down
 Move Down
 Move Down
