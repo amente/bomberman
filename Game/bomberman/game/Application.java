@@ -6,9 +6,6 @@ public class Application {
 	
 	public static final int QUEUE_CAPACITY = 10;
 	public static final int MAX_DTATAGRAM_SIZE = 1024; // In Bytes
-	public static final String BROADCAST_ADDR = "203.0.113.0";
-	public static final String MESSAGE_DELIMITER = "/delim/";
-	
 	
 	static boolean gameRunning = false;
 	

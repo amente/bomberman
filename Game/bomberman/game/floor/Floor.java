@@ -11,7 +11,10 @@ import java.util.Random;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
 
+import bomberman.game.ClientUpdate;
 import bomberman.game.network.NetworkAddress;
+import bomberman.utils.buffer.Producer;
+import bomberman.utils.buffer.SingleBuffer;
 
 
 /**
@@ -24,13 +27,17 @@ public class Floor {
 	
 	
 	public static final int DEFAULTX = 0; // Default location for an object on the floor
-	public static final int DEFAULTY = 0;  
+	public static final int DEFAULTY = 0; 
+	
 	
 	public static final String EMPTYNAME = "_"; // String representation of an empty floor grid
 	
 	private HashMap<NetworkAddress,Player>  players;
 	private Player hostPlayer;
 	private ArrayList<Tile> emptyTiles = new ArrayList<Tile>() ;
+	
+    private SingleBuffer<ClientUpdate> gameStateUpdates;
+	private Producer<ClientUpdate> producer;
 	
 	private Tile[][] tiles;
 	private TiledMap map;
@@ -39,7 +46,9 @@ public class Floor {
 	
 	Random rand = new Random();
 	
-	public Floor(){		
+	public Floor(){	
+		gameStateUpdates = new SingleBuffer<ClientUpdate>(10);
+		producer = new Producer<ClientUpdate>(gameStateUpdates);
 		initialize();		
 	}	
 	
@@ -137,6 +146,8 @@ public class Floor {
 				
 		System.out.println("Placing " + player.getName()+ " on Floor at "+x+","+y);		
 		placeNewObjectAt(player,x,y);
+		//Add to the client update buffer
+		producer.produce(makeUpdateForaddPlayer(player));
 		return player.getName();
 	}
 	
@@ -145,6 +156,21 @@ public class Floor {
 		
 		
 	}
+	
+	private ClientUpdate makeUpdateForaddPlayer(Player player){
+		ClientUpdate update = new ClientUpdate(ClientUpdate.UpdateType.NEW);
+		update.addParameter("OBJECT_TYPE", "PLAYER");
+		update.addParameter("OBJECT_NAME", player.getName());
+		update.addParameter("X_LOC", ""+player.getX());
+		update.addParameter("Y_LOC", ""+player.getX());
+		return update;		
+	}
+	
+	
+	public SingleBuffer<ClientUpdate> getGameStateUpdateBuffer(){
+		return gameStateUpdates;
+	}
+	
 	
 	/**
 	 * Loads the initial state of the floor from a map(.tmx) file
@@ -302,6 +328,6 @@ public class Floor {
 
 	public boolean hasPlayer(NetworkAddress senderAddress) {
 		return players.containsKey(senderAddress);
-	}	
+	}
 	
 }

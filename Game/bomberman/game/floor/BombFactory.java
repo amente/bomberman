@@ -18,8 +18,8 @@ public class BombFactory {
 	
 	public Bomb makeBombFor(Player player,Floor floor){
 		Bomb bomb = new Bomb(floor);
-		bomb.setLocationTo(player.getX(),player.getY());	
-		producer.produce(bomb);		
+		bomb.setLocationTo(player.getX(),player.getY());		
+		producer.produce(bomb);
 		return bomb;	
 	}
 

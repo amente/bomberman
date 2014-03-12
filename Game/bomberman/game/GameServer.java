@@ -21,7 +21,8 @@ public class GameServer extends Thread {
 	private Producer<GameAction> producer;
 	
 		
-	public GameServer(int port){			
+	public GameServer(int port){
+		super("GameServer");
 		try {
 			networkManager = new NetworkManager(port);
 		} catch (SocketException e) {
@@ -84,5 +85,12 @@ public class GameServer extends Thread {
 	public void broadCastEndGame(NetworkAddress[] allPlayers) {
 				
 	}
+
+	public void addAction(GameAction action) {
+		producer.produce(action);
+	}
 	
+	public NetworkManager getNetworkManager(){
+		return networkManager;
+	}
 }

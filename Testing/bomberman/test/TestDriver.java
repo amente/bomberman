@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.DatagramPacket;
 
 import bomberman.game.network.NetworkAddress;
 import bomberman.game.network.NetworkManager;
@@ -101,6 +102,15 @@ public class TestDriver {
 			networkManager.sendAsynchronous("Game Start",serverAddress,false);			
 		}
 		
+		public void listenAndPrintUpdates(){			
+			DatagramPacket packet = networkManager.receiveAsynchronous(200, true);
+			if(packet!=null){
+				System.out.println("Recieved Updates:");
+				String message = new String(packet.getData(),packet.getOffset(),packet.getLength());
+				System.out.println(message);
+			}
+		}
+		
 		@Override
 		public void run(){			
 			String cmd = null;
@@ -123,6 +133,9 @@ public class TestDriver {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					
+					// After every sent command listen for updates					
+					listenAndPrintUpdates();
 					
 					if(this.isInterrupted()){
 						reader.close();

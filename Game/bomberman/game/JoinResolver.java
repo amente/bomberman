@@ -25,7 +25,7 @@ public class JoinResolver implements PacketProcessor {
 						
 			if(action.getType() == GameAction.Type.GAME){
 				
-				String param = action.getParameter("CALL");
+				String param = (String)(action.getParameter("CALL"));
 				
 				if(param.equalsIgnoreCase("JOIN")){
 					

@@ -9,23 +9,25 @@ public class GameAction {
 	public enum Type{		
 		MOVE,
 		BOMB, 
-		GAME		
+		GAME,
+		EXPLOSION,
 	}
 	
 		
 	private Type type;
-	private HashMap<String,String> parameters;	
+	private HashMap<String,Object> parameters;	
 	private NetworkAddress senderAddress = null;
+	private boolean isFromServer = false;
 	
 	public GameAction(){
-		parameters = new HashMap<String,String>(3);	
+		parameters = new HashMap<String,Object>(3);	
 	}	
 	
-	public void addParameter(String key,String value){
+	public void addParameter(String key,Object value){
 		parameters.put(key, value);
 	}
 	
-	public String getParameter(String key) {
+	public Object getParameter(String key) {
 		return parameters.get(key);
 	}
 	
@@ -54,5 +56,12 @@ public class GameAction {
 
 	public void setSenderAddress(NetworkAddress networkAddress) {
 		this.senderAddress  = networkAddress;		
+	}
+
+	public void setIsFromServer(){
+		isFromServer = true;
+	}
+	public boolean isFromServer() {		
+		return isFromServer ;
 	}
 }

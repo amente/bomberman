@@ -48,7 +48,7 @@ public class NetworkManager {
 	 * @param recvAddress the reciver address
 	 * @param doCount true if send count should be incremented
 	 */
-	public void sendAsynchronous(String message, NetworkAddress recvAddress,boolean doCount) {
+	public synchronized void sendAsynchronous(String message, NetworkAddress recvAddress,boolean doCount) {
 		try {			
 			DatagramPacket p = makeDatagramPacket(message,recvAddress);
 			socket.send(p);
@@ -76,7 +76,7 @@ public class NetworkManager {
 	 * @param doCount true if send count should be incremented when success
 	 * @return the ACK message
 	 */
-	public String sendSynchronous(String message,NetworkAddress recvAddress,String expectedACK,int numAttempts,int timeOut,boolean doCount){		
+	public synchronized String sendSynchronous(String message,NetworkAddress recvAddress,String expectedACK,int numAttempts,int timeOut,boolean doCount){		
 		DatagramPacket p;
 		String ackString =null;
 		try {
@@ -130,7 +130,7 @@ public class NetworkManager {
 	 * @param doCount true if receive count should be incremented
 	 * @return
 	 */
-	public DatagramPacket receiveAsynchronous(int timeOut,boolean doCount) {
+	public synchronized DatagramPacket receiveAsynchronous(int timeOut,boolean doCount) {
 		byte[] buf = new byte[1024];
 		DatagramPacket packet = new DatagramPacket(buf, buf.length);
 		
@@ -162,7 +162,7 @@ public class NetworkManager {
 	 * @param doCount   true if receive count should be incremented 
 	 * @return
 	 */
-	public DatagramPacket receiveSynchronous(int timeOut,int buffSize,boolean doCount,PacketProcessor p) {
+	public synchronized DatagramPacket receiveSynchronous(int timeOut,int buffSize,boolean doCount,PacketProcessor p) {
 		byte[] buf = new byte[buffSize];
 		DatagramPacket packet = new DatagramPacket(buf, buf.length);		
 		try {
@@ -208,7 +208,7 @@ public class NetworkManager {
 	 * @param doCount   true if receive count should be incremented 
 	 * @return
 	 */
-	public DatagramPacket receiveSynchronous(String ackMessage,int timeOut,int buffSize,boolean doCount) {
+	public synchronized DatagramPacket receiveSynchronous(String ackMessage,int timeOut,int buffSize,boolean doCount) {
 		byte[] buf = new byte[buffSize];
 		DatagramPacket packet = new DatagramPacket(buf, buf.length);		
 		
@@ -262,7 +262,7 @@ public class NetworkManager {
 		recieveCount.put(addr,num);
 	}
 	
-	public DatagramPacket makeDatagramPacket(String message,NetworkAddress address) throws SocketException{
+	public synchronized DatagramPacket makeDatagramPacket(String message,NetworkAddress address) throws SocketException{
 		if(address.isSocketAddress()){
 			return new DatagramPacket(message.getBytes(), message.length(),address.getSocketAddr());
 		}else if(address.isInetAddress()){
