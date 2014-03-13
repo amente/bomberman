@@ -262,7 +262,7 @@ public class NetworkManager {
 		recieveCount.put(addr,num);
 	}
 	
-	public synchronized DatagramPacket makeDatagramPacket(String message,NetworkAddress address) throws SocketException{
+	public DatagramPacket makeDatagramPacket(String message,NetworkAddress address) throws SocketException{
 		if(address.isSocketAddress()){
 			return new DatagramPacket(message.getBytes(), message.length(),address.getSocketAddr());
 		}else if(address.isInetAddress()){

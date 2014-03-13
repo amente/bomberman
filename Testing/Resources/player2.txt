@@ -1,21 +1,14 @@
-Move Left
 Move Right
-Move Left
 Move Right
-Move Left
 Move Right
-Move Left
-Move Down
-Move Down
-Move Down
-Move Down
-Move Down
-Move Down
-Move Up
-Move Up
+Move Right
+Move Right
 Bomb
-Move Down
-Move Down
+Move Left
+Move Left
+Move Left
+Move Left
+Move Left
 Move Down
 Move Down
 Move Down
@@ -23,9 +16,27 @@ Move Down
 Move Down
 Bomb
 Move Down
-Move Right
+Move Down
+Move Down
+Move Left
+Move Left
+Move Left
+Move Left
 Move Left
 Move Down
-Move Right
-Move Left
 Move Down
+Move Down
+Move Down
+Move Down
+Bomb
+Move Down
+Move Down
+Move Down
+Move Right
+Move Right
+Move Right
+Bomb
+Move Left
+Move Left
+Move Left
+Move Left

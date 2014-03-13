@@ -11,7 +11,8 @@ import java.util.Random;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
 
-import bomberman.game.ClientUpdate;
+import bomberman.game.GameStateUpdate;
+import bomberman.game.floor.Movable.MovementType;
 import bomberman.game.network.NetworkAddress;
 import bomberman.utils.buffer.Producer;
 import bomberman.utils.buffer.SingleBuffer;
@@ -25,6 +26,8 @@ import bomberman.utils.buffer.SingleBuffer;
  */
 public class Floor {	
 	
+	//For testing only
+	boolean next = false;
 	
 	public static final int DEFAULTX = 0; // Default location for an object on the floor
 	public static final int DEFAULTY = 0; 
@@ -36,8 +39,8 @@ public class Floor {
 	private Player hostPlayer;
 	private ArrayList<Tile> emptyTiles = new ArrayList<Tile>() ;
 	
-    private SingleBuffer<ClientUpdate> gameStateUpdates;
-	private Producer<ClientUpdate> producer;
+    private SingleBuffer<GameStateUpdate> gameStateUpdates;
+	private Producer<GameStateUpdate> producer;
 	
 	private Tile[][] tiles;
 	private TiledMap map;
@@ -47,8 +50,8 @@ public class Floor {
 	Random rand = new Random();
 	
 	public Floor(){	
-		gameStateUpdates = new SingleBuffer<ClientUpdate>(10);
-		producer = new Producer<ClientUpdate>(gameStateUpdates);
+		gameStateUpdates = new SingleBuffer<GameStateUpdate>(10);
+		producer = new Producer<GameStateUpdate>(gameStateUpdates);
 		initialize();		
 	}	
 	
@@ -59,7 +62,7 @@ public class Floor {
 		players = new HashMap<NetworkAddress,Player>();
 	}
 	
-	public boolean moveObjectTo(FloorObject o,int x,int y)
+	public boolean moveObjectTo(FloorObject o,int x,int y,MovementType dir)
 	{
 		// Check if movement is to location outside the floor
 		if(x>xSize-1 || y>ySize-1 || x<0 || y<0){ return ((Movable)o).movedOutOfGrid();}
@@ -72,9 +75,10 @@ public class Floor {
 			tiles[o.getX()][o.getY()].removeObject(); // Remove from previous location	
 			emptyTiles.add(tiles[o.getX()][o.getY()]);
 			o.setLocationTo(x, y);
-			System.out.println("x: " + x + " y: " + y);
+			//System.out.println("x: " + x + " y: " + y);
 			tiles[x][y].replaceObject(o); // Move to new location
 			System.out.println(o.getName()+" moved to "+x+","+y);
+			producer.produce(makeUpdateForMove(o,dir));
 			return true;
 		}else{
 			//Moved to occupied space, what to do with it? Callback
@@ -82,11 +86,16 @@ public class Floor {
 		}		
 	}	
 		
-	public void placeNewObjectAt(FloorObject o,int x,int y){		
+	public void addNewObject(FloorObject o,int x,int y){		
 		if(tiles[x][y].getObject() == null){
 			tiles[x][y].replaceObject(o);	
 			o.setLocationTo(x, y);
-		}			
+			producer.produce(makeUpdateForAddObject(o));
+		}else{
+			tiles[x][y].addAnother(o);	
+			o.setLocationTo(x, y);
+			producer.produce(makeUpdateForAddObject(o));
+		}
 	}
 	
 	/**
@@ -109,9 +118,17 @@ public class Floor {
 	 * @param player
 	 */
 	public String addPlayer(NetworkAddress playerAddress) {
-		// Pop the next empy tile
-		Tile t = emptyTiles.remove(rand.nextInt(emptyTiles.size()));
-		return addPlayer(playerAddress,t.x,t.y);
+		// Pop the next empty tile
+		//Tile t = emptyTiles.remove(rand.nextInt(emptyTiles.size()));
+		//return addPlayer(playerAddress,1,1);
+		
+		//For testing only
+		if(!next){
+			next = true;
+			return addPlayer(playerAddress,1,1);			
+		}else{
+			return addPlayer(playerAddress,5,1);
+		}		
 	}
 	
 	/**
@@ -145,29 +162,44 @@ public class Floor {
 		players.put(player.getAddress(), player);
 				
 		System.out.println("Placing " + player.getName()+ " on Floor at "+x+","+y);		
-		placeNewObjectAt(player,x,y);
-		//Add to the client update buffer
-		producer.produce(makeUpdateForaddPlayer(player));
+		addNewObject(player,x,y);		
 		return player.getName();
 	}
 	
 	public void explodeBomb(Bomb bomb){		
 		System.out.println("Bomb Exploded"+" x:"+bomb.getX()+" y:"+bomb.getY());
-		
-		
+		producer.produce(makeUpdateForExplodeBomb(bomb));		
 	}
 	
-	private ClientUpdate makeUpdateForaddPlayer(Player player){
-		ClientUpdate update = new ClientUpdate(ClientUpdate.UpdateType.NEW);
-		update.addParameter("OBJECT_TYPE", "PLAYER");
-		update.addParameter("OBJECT_NAME", player.getName());
-		update.addParameter("X_LOC", ""+player.getX());
-		update.addParameter("Y_LOC", ""+player.getX());
+	private GameStateUpdate makeUpdateForAddObject(FloorObject o){
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.NEW);
+		update.addParameter("OBJECT_TYPE", o.getType());
+		update.addParameter("OBJECT_NAME", o.getName());
+		update.addParameter("X_LOC", ""+o.getX());
+		update.addParameter("Y_LOC", ""+o.getY());
 		return update;		
 	}
 	
 	
-	public SingleBuffer<ClientUpdate> getGameStateUpdateBuffer(){
+	private GameStateUpdate makeUpdateForMove(FloorObject o,MovementType dir){
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.MOVE);
+		update.addParameter("DIR",dir.name());
+		update.addParameter("OBJECT_NAME", o.getName());
+		update.addParameter("X_LOC", ""+o.getX());
+		update.addParameter("Y_LOC", ""+o.getY());
+		return update;		
+	}
+	
+		
+	private GameStateUpdate makeUpdateForExplodeBomb(Bomb b){
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.BOMB);		
+		update.addParameter("STATUS", "EXPLODE");
+		update.addParameter("X_LOC", ""+b.getX());
+		update.addParameter("Y_LOC", ""+b.getY());
+		return update;		
+	}
+	
+	public SingleBuffer<GameStateUpdate> getGameStateUpdateBuffer(){
 		return gameStateUpdates;
 	}
 	
@@ -179,7 +211,7 @@ public class Floor {
 	public void loadStateFromTmxFile(String filePath){
 		
 		/*
-		 * A workaround to invoking private method from TiledMap class
+		 * A workaround using reflection to invoking private method from TiledMap class
 		 */
 		try {
 			Method pvtMethod  = TiledMap.class.getDeclaredMethod("setHeadless",Boolean.TYPE);
@@ -232,7 +264,7 @@ public class Floor {
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Enemy(this));					
  				}else if(value.equalsIgnoreCase("empty")){
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,null);
- 					emptyTiles.add(new Tile(xAxis,yAxis,null));					
+ 					emptyTiles.add(tiles[xAxis][yAxis]);					
  				}
                  
              }

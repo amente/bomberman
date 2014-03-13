@@ -7,7 +7,8 @@ public class Bomb extends FloorObject {
 	private Player player;	
 	
 	public Bomb(Floor floor) {
-		super(floor, "BOMB");		
+		super(floor, "BOMB");	
+		setType("Bomb");
 	}
 	
 	/**

@@ -21,13 +21,11 @@ public class GameServer extends Thread {
 	private Producer<GameAction> producer;
 	
 		
-	public GameServer(int port){
+	public GameServer(int port) throws SocketException{
 		super("GameServer");
-		try {
-			networkManager = new NetworkManager(port);
-		} catch (SocketException e) {
-			System.out.println("Socket bind failed for game server!");
-		}
+		
+		networkManager = new NetworkManager(port);
+		
 		messageBuffer = new SingleBuffer<GameAction>(Application.QUEUE_CAPACITY);	
 		producer = new Producer<GameAction>(messageBuffer);
 		

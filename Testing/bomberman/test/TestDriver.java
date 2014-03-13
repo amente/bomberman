@@ -6,8 +6,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.DatagramPacket;
 
+import org.newdawn.slick.AppGameContainer;
+import org.newdawn.slick.BasicGame;
+import org.newdawn.slick.SlickException;
+
+import bomberman.game.GameStateUpdate;
 import bomberman.game.network.NetworkAddress;
 import bomberman.game.network.NetworkManager;
+import bomberman.utils.buffer.Producer;
+import bomberman.utils.buffer.SingleBuffer;
 
 public class TestDriver {
 	public static void main(String args[]) {
@@ -28,6 +35,9 @@ public class TestDriver {
 		TestPlayer player1 = driver.new TestPlayer(p1File,serverPort,serverAddress);
 		TestPlayer player2 = driver.new TestPlayer(p2File,serverPort,serverAddress);
 		
+		
+		TestSpectator p1GUI = new TestSpectator(player1);
+				 
 		
 		String player1ID = player1.sendJoin();
 		if(player1ID != null){
@@ -64,6 +74,8 @@ public class TestDriver {
 		// Start sending move messages 
 		player2.start();
 		
+		startGUIThread(p1GUI);
+		
 		try {
 			player1.join();
 			player2.join();
@@ -81,7 +93,12 @@ public class TestDriver {
 		BufferedReader reader;
 		NetworkManager networkManager;		
 		private NetworkAddress serverAddress;
+		String playerName ;
+		
 						
+		private SingleBuffer<GameStateUpdate> gameStateUpdates;
+		private Producer<GameStateUpdate> producer;
+		
 		TestPlayer(File testFile,int serverPort,String serverAddress){
 			try {
 			    reader = new BufferedReader(new FileReader(testFile));
@@ -89,13 +106,17 @@ public class TestDriver {
 			    this.serverAddress = new NetworkAddress(serverAddress,serverPort);			    			  
 			} catch (IOException e) {
 			    e.printStackTrace();
-			}			
+			}
+			
+			gameStateUpdates = new SingleBuffer<GameStateUpdate>(10);
+			producer = new Producer<GameStateUpdate>(gameStateUpdates);
 		}		
 		
 		
 		public String sendJoin(){	
 			System.out.println("Sending Join Message...");
-			return networkManager.sendSynchronous("Game Join",serverAddress,null,3,5000,false);			
+			playerName = networkManager.sendSynchronous("Game Join",serverAddress,null,3,5000,false);		
+			return playerName;
 		}
 		
 		public void sendStartGame(){			
@@ -105,8 +126,9 @@ public class TestDriver {
 		public void listenAndPrintUpdates(){			
 			DatagramPacket packet = networkManager.receiveAsynchronous(200, true);
 			if(packet!=null){
-				System.out.println("Recieved Updates:");
+				System.out.println(playerName+" Recieved Updates:");
 				String message = new String(packet.getData(),packet.getOffset(),packet.getLength());
+				producer.produce(new GameStateUpdate(message));
 				System.out.println(message);
 			}
 		}
@@ -126,9 +148,9 @@ public class TestDriver {
 						networkManager.sendAsynchronous(cmd.trim(),serverAddress,true);
 					}
 					
-					//Send command every 1000 milliseconds
+					//Send command every 200 milliseconds
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(200);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -155,11 +177,38 @@ public class TestDriver {
 			}
 		}
 		
+		public SingleBuffer<GameStateUpdate> getGameStateUpdates(){
+				return gameStateUpdates;
+		}
+		
+		
+		
 	}
-	
-	
-	
-	
+		
+	public static void startGUIThread(final BasicGame game){
+		
+		Thread guiThread = new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				 AppGameContainer app1;
+					try {
+						app1 = new AppGameContainer(game);
+						app1.setShowFPS(false);
+				        app1.setDisplayMode(960, 780, false);            
+				        app1.start();
+					} catch (SlickException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+				}  
+				
+			}
+			
+		});
+		
+		guiThread.start();
+		
+	}
 	
 	
 	

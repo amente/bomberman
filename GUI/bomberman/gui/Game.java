@@ -30,6 +30,7 @@ public class Game extends BasicGame{
 		// TODO Auto-generated method stub
 		map.render(0, 0);
 		sprite.draw((int)x, (int)y);
+		
 	}
 
 	@Override
@@ -50,6 +51,7 @@ public class Game extends BasicGame{
             
                 sprite.update(delta);                
                 y -= delta * 0.1f;
+                System.out.println("x: "+x+" y: "+y);
             
         }
         else if (input.isKeyDown(Input.KEY_DOWN))
@@ -58,6 +60,7 @@ public class Game extends BasicGame{
            
                 sprite.update(delta);
                 y += delta * 0.1f;
+                System.out.println("x: "+x+" y: "+y);
             
         }
         else if (input.isKeyDown(Input.KEY_LEFT))
@@ -66,7 +69,7 @@ public class Game extends BasicGame{
            
                 sprite.update(delta);
                 x -= delta * 0.1f;
-                
+                System.out.println("x: "+x+" y: "+y);
            
         }
         else if (input.isKeyDown(Input.KEY_RIGHT))
@@ -75,7 +78,7 @@ public class Game extends BasicGame{
            
                 sprite.update(delta);
                 x += delta * 0.1f;
-            
+                System.out.println("x: "+x+" y: "+y);
         }
 		
 		

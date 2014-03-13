@@ -21,7 +21,7 @@ public class BombScheduler  extends Thread{
 	
 	public void attachTimer(Bomb bomb){
 		Timer timer = new Timer();
-		timer.schedule(new Detonator(bomb,this), 2000);
+		timer.schedule(new Detonator(bomb,timer,this), 2000);
 	}
 	
 	@Override
@@ -45,13 +45,16 @@ public class BombScheduler  extends Thread{
 
 		private Bomb bomb;
 		private BombScheduler scheduler;
-		public Detonator(Bomb bomb,BombScheduler scheduler){
+		private Timer timer;
+		public Detonator(Bomb bomb,Timer timer,BombScheduler scheduler){
 			this.bomb = bomb;
 			this.scheduler = scheduler;
+			this.timer = timer;
 		}
 		@Override
 		public void run() {
 			scheduler.explosionTimeReached(bomb);
+			timer.cancel();
 		}
 		
 	}

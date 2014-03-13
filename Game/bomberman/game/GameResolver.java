@@ -14,7 +14,7 @@ public class GameResolver extends Thread{
 	private BombFactory bombFactory;
 	private BombScheduler bombScheduler;
 	private GameServer gameServer;	
-	private ClientUpdater clientUpdater;
+	private GameStateUpdater clientUpdater;
 	
 	
 	private Consumer<GameAction> consumer;
@@ -27,15 +27,15 @@ public class GameResolver extends Thread{
 		gameFloor = new Floor();	
 		bombFactory  = new BombFactory();
 		bombScheduler = new BombScheduler(bombFactory,this);
-		bombScheduler.start();
 		
-		clientUpdater = new ClientUpdater(this);
-		clientUpdater.start();		
+		
+		clientUpdater = new GameStateUpdater(this);			
 	}	
 			
 	@Override
 	public void run(){
-		
+		clientUpdater.start();	
+		bombScheduler.start();
 		while(gameServer.isRunning()){
 			processMessages();
 		}		

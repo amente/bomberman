@@ -12,6 +12,7 @@ public class Player extends FloorObject implements Movable {
 	public Player(Floor floor, String name) {
 		super(floor, name);
 		// TODO Auto-generated constructor stub
+		setType("Player");
 	}
 
 	@Override

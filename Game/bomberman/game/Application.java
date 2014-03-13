@@ -1,6 +1,7 @@
 package bomberman.game;
 
 import java.io.IOException;
+import java.net.SocketException;
 
 public class Application {
 	
@@ -19,12 +20,18 @@ public class Application {
 		
 		int listenPort = Integer.parseInt(args[0]);							
 		
-		GameServer gameServer = new GameServer(listenPort);		
+		GameServer gameServer = null;
+		try{
+			gameServer = new GameServer(listenPort);	
+		}catch(SocketException e){
+			System.out.println("Unable to start server!");
+			System.exit(1);
+		}
+		
 		GameResolver gameResolver = new GameResolver(gameServer);
 		JoinResolver joinResolver = new JoinResolver(gameResolver,gameServer);
 		
 		
-
 		System.out.println("Creating Game: Success");
 		gameServer.listenForJoin(joinResolver);
 		

@@ -1,9 +1,12 @@
 package bomberman.game.floor;
 
+import bomberman.game.floor.Movable.MovementType;
+
 
 public class FloorObject{
 	
 	private String name;
+	private String type;
 	private Floor floor;
 	private int x;
 	private int y;
@@ -35,19 +38,29 @@ public class FloorObject{
 	}	
 	
 	public void moveLeft(){		
-		floor.moveObjectTo(this,x+1,y);
+		floor.moveObjectTo(this,x+1,y,MovementType.LEFT);
 	}	
 	
 	public void moveRight(){		
-		floor.moveObjectTo(this,x-1,y);
+		floor.moveObjectTo(this,x-1,y,MovementType.RIGHT);
 	}	
 	
 	public void moveUp(){		
-		floor.moveObjectTo(this,x,y+1);
+		floor.moveObjectTo(this,x,y+1,MovementType.UP);
 	}	
 	
 	public void moveDown(){		
-		floor.moveObjectTo(this,x,y-1);
+		floor.moveObjectTo(this,x,y-1,MovementType.DOWN);
+	}
+
+
+	public String getType() {
+		return type;
+	}
+
+
+	public void setType(String type) {
+		this.type = type;
 	}				
 	
 }	
