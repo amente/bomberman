@@ -11,6 +11,8 @@ import java.util.Random;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
 
+import bomberman.game.GameAction;
+import bomberman.game.GameResolver;
 import bomberman.game.GameStateUpdate;
 import bomberman.game.floor.Movable.MovementType;
 import bomberman.game.network.NetworkAddress;
@@ -38,6 +40,7 @@ public class Floor {
 	private HashMap<NetworkAddress,Player>  players;
 	private Player hostPlayer;
 	private ArrayList<Tile> emptyTiles = new ArrayList<Tile>() ;
+	private GameResolver gameResolver;
 	
     private SingleBuffer<GameStateUpdate> gameStateUpdates;
 	private Producer<GameStateUpdate> producer;
@@ -49,9 +52,10 @@ public class Floor {
 	
 	Random rand = new Random();
 	
-	public Floor(){	
+	public Floor(GameResolver gameResolver){	
 		gameStateUpdates = new SingleBuffer<GameStateUpdate>(10);
 		producer = new Producer<GameStateUpdate>(gameStateUpdates);
+		this.gameResolver = gameResolver;
 		initialize();		
 	}	
 	
@@ -76,13 +80,13 @@ public class Floor {
 			emptyTiles.add(tiles[o.getX()][o.getY()]);
 			o.setLocationTo(x, y);
 			//System.out.println("x: " + x + " y: " + y);
-			tiles[x][y].replaceObject(o); // Move to new location
+			tiles[x][y].replaceObject(o); // Move to new location 
 			System.out.println(o.getName()+" moved to "+x+","+y);
-			producer.produce(makeUpdateForMove(o,dir));
+			producer.produce(GameStateUpdate.makeUpdateForMove(o,dir));
 			return true;
 		}else{
 			//Moved to occupied space, what to do with it? Callback
-			return ((Movable)o).movedToOccupiedGrid(tiles[x][y]);
+			return ((Movable)o).movedToOccupiedGrid(tiles[x][y],dir);
 		}		
 	}	
 		
@@ -90,11 +94,11 @@ public class Floor {
 		if(tiles[x][y].getObject() == null){
 			tiles[x][y].replaceObject(o);	
 			o.setLocationTo(x, y);
-			producer.produce(makeUpdateForAddObject(o));
+			producer.produce(GameStateUpdate.makeUpdateForAddObject(o));
 		}else{
 			tiles[x][y].addAnother(o);	
-			o.setLocationTo(x, y);
-			producer.produce(makeUpdateForAddObject(o));
+			o.setLocationTo(x, y); 
+			producer.produce(GameStateUpdate.makeUpdateForAddObject(o));
 		}
 	}
 	
@@ -168,37 +172,9 @@ public class Floor {
 	
 	public void explodeBomb(Bomb bomb){		
 		System.out.println("Bomb Exploded"+" x:"+bomb.getX()+" y:"+bomb.getY());
-		producer.produce(makeUpdateForExplodeBomb(bomb));		
-	}
-	
-	private GameStateUpdate makeUpdateForAddObject(FloorObject o){
-		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.NEW);
-		update.addParameter("OBJECT_TYPE", o.getType());
-		update.addParameter("OBJECT_NAME", o.getName());
-		update.addParameter("X_LOC", ""+o.getX());
-		update.addParameter("Y_LOC", ""+o.getY());
-		return update;		
-	}
-	
-	
-	private GameStateUpdate makeUpdateForMove(FloorObject o,MovementType dir){
-		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.MOVE);
-		update.addParameter("DIR",dir.name());
-		update.addParameter("OBJECT_NAME", o.getName());
-		update.addParameter("X_LOC", ""+o.getX());
-		update.addParameter("Y_LOC", ""+o.getY());
-		return update;		
-	}
-	
+		producer.produce(GameStateUpdate.makeUpdateForExplodeBomb(bomb));		
+	}	
 		
-	private GameStateUpdate makeUpdateForExplodeBomb(Bomb b){
-		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.BOMB);		
-		update.addParameter("STATUS", "EXPLODE");
-		update.addParameter("X_LOC", ""+b.getX());
-		update.addParameter("Y_LOC", ""+b.getY());
-		return update;		
-	}
-	
 	public SingleBuffer<GameStateUpdate> getGameStateUpdateBuffer(){
 		return gameStateUpdates;
 	}
@@ -246,8 +222,7 @@ public class Floor {
 		tiles = new Tile[map.getWidth()][map.getHeight()];
 		
 		for (int xAxis=0;xAxis<map.getWidth(); xAxis++)
-        {
-			 
+        {		 
 			
              for (int yAxis=0;yAxis<map.getHeight(); yAxis++)
              {
@@ -255,7 +230,7 @@ public class Floor {
                  String value = map.getTileProperty(tileID, "type", "none");                 
 
  				if(value.equalsIgnoreCase("brick")){					
- 					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Brick(this)); 					
+ 					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Box(this)); 					
  				}else if(value.equalsIgnoreCase("door")){
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Door(this));					
  				} else if(value.equalsIgnoreCase("wall")){
@@ -267,7 +242,7 @@ public class Floor {
  					emptyTiles.add(tiles[xAxis][yAxis]);					
  				}
                  
-             }
+             }  
         }		
 		
 	}	
@@ -335,7 +310,9 @@ public class Floor {
 			 * Removes the first object on the tile
 			 */
 			public void removeObject(){
-				objects.remove();
+				if(objects.size()>0){
+					objects.remove();
+				}
 			}
 			
 			
@@ -360,6 +337,35 @@ public class Floor {
 
 	public boolean hasPlayer(NetworkAddress senderAddress) {
 		return players.containsKey(senderAddress);
+	}
+
+	public void addkillPlayerAction(Player p) {
+		// TODO Auto-generated method stub
+		GameAction action = new GameAction();
+		action.setType(GameAction.Type.KILL);
+		action.addParameter("PLAYER",p);	
+		action.setIsFromServer();
+		gameResolver.getGameServer().addAction(action);
+	}
+
+	public void givePowerUp(Player player) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void MoveAnotherObjectTo(FloorObject o, int x, int y,
+			MovementType dir) {
+			tiles[x][y].addAnother(o);	
+			o.setLocationTo(x, y);
+			producer.produce(GameStateUpdate.makeUpdateForMove(o,dir));
+	
+	}
+
+	public void killPlayer(Player p) {
+		tiles[p.getX()][p.getY()].removeObject();	
+		System.out.println(p.getName()+ "died!");		
+		producer.produce(GameStateUpdate.makeUpdateForRemoveObject(p));		
+		//players.remove(p.getAddress());
 	}
 	
 }

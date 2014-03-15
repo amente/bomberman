@@ -5,6 +5,7 @@ public class Wall extends FloorObject{
 	public Wall(Floor floor) {
 		super(floor,"Wall");
 		// TODO Auto-generated constructor stub
+		setType("Wall");
 	}
 	
 

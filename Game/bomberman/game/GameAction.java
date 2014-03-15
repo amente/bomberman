@@ -11,6 +11,7 @@ public class GameAction {
 		BOMB, 
 		GAME,
 		EXPLOSION,
+		KILL,
 	}
 	
 		

@@ -3,6 +3,10 @@ package bomberman.game;
 import java.util.Map;
 import java.util.TreeMap;
 
+import bomberman.game.floor.Bomb;
+import bomberman.game.floor.FloorObject;
+import bomberman.game.floor.Movable.MovementType;
+
 /*
  *The game state update consists of sequential board state updates
  * 
@@ -61,9 +65,55 @@ public class GameStateUpdate {
 			parameters.put("OBJECT_NAME",tokens[2]);
 			parameters.put("X_LOC",tokens[3]);
 			parameters.put("Y_LOC",tokens[4]);
-		}
+		}else if(stype.equalsIgnoreCase(UpdateType.BOMB.name())){
+			type = UpdateType.BOMB;
+			parameters.put("STATUS", tokens[1]);			
+			parameters.put("X_LOC",tokens[2]);
+			parameters.put("Y_LOC",tokens[3]);
+		}else if(stype.equalsIgnoreCase(UpdateType.DEL.name())){
+			type = UpdateType.DEL;
+			parameters.put("OBJECT_NAME", tokens[1]);			
+			parameters.put("OBJECT_TYPE",tokens[2]);		
+		}					
 		
 	}
+	
+	public static GameStateUpdate makeUpdateForAddObject(FloorObject o){
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.NEW);
+		update.addParameter("OBJECT_TYPE", o.getType());
+		update.addParameter("OBJECT_NAME", o.getName());
+		update.addParameter("X_LOC", ""+o.getX());
+		update.addParameter("Y_LOC", ""+o.getY());
+		return update;		
+	}
+	
+	
+	public static GameStateUpdate makeUpdateForMove(FloorObject o,MovementType dir){
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.MOVE);
+		update.addParameter("DIR",dir.name());
+		update.addParameter("OBJECT_NAME", o.getName());
+		update.addParameter("X_LOC", ""+o.getX());
+		update.addParameter("Y_LOC", ""+o.getY());
+		return update;		
+	}
+	
+		
+	public static GameStateUpdate makeUpdateForExplodeBomb(Bomb b){
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.BOMB);		
+		update.addParameter("STATUS", "EXPLODE");
+		update.addParameter("X_LOC", ""+b.getX());
+		update.addParameter("Y_LOC", ""+b.getY());
+		return update;		
+	}
+	
+	public static GameStateUpdate makeUpdateForRemoveObject(FloorObject o){
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.DEL);
+		update.addParameter("OBJECT_NAME", o.getName());
+		update.addParameter("OBJECT_TYPE", o.getType()); 				
+		return update;		
+	}
+	
+	
 	
 	public void addParameter(String key,String value){
 		parameters.put(key, value);

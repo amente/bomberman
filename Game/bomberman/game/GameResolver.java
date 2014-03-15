@@ -24,7 +24,7 @@ public class GameResolver extends Thread{
 		this.gameServer = gameServer;		
 		consumer = new Consumer<GameAction>(gameServer.getMessageBuffer());		
 		
-		gameFloor = new Floor();	
+		gameFloor = new Floor(this);	
 		bombFactory  = new BombFactory();
 		bombScheduler = new BombScheduler(bombFactory,this);
 		
@@ -67,9 +67,19 @@ public class GameResolver extends Thread{
 			break;
 			
 		case EXPLOSION:
-			processExplosionAction(action);			
+			processExplosionAction(action);	
+			break;
+		case KILL:
+			processKillAction(action);
 		}	
 		
+	}
+
+	private void processKillAction(GameAction action) {
+		if(!(action.getType() == GameAction.Type.KILL)){return;}
+		
+		Player p = (Player)(action.getParameter("PLAYER"));		
+		gameFloor.killPlayer(p);
 	}
 
 	private void processExplosionAction(GameAction action) {

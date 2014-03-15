@@ -1,0 +1,32 @@
+1
+START
+Move Right
+Move Right
+Move Right
+Move Right
+Move Down
+Move Down
+Move Down
+Move Right
+Move Right
+Move Right
+Bomb
+Move Down
+Move Down
+Move Down
+Move Down
+Move Left
+Move Left
+Move Left
+Move Left
+Move Left
+Move Left
+Move Left
+Move Up
+Move Up
+Move Up
+Move Up
+Move Up
+Move Up
+Move Up
+END
