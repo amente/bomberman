@@ -8,18 +8,32 @@ public class Player extends FloorObject implements Movable {
 
 	private boolean isHost;
 	private NetworkAddress addr;
+	private Floor gameFloor;
 	
 	public Player(Floor floor, String name) {
 		super(floor, name);
 		// TODO Auto-generated constructor stub
 		setType("Player");
+		this.gameFloor = floor;
 	}
 
 	@Override
-	public boolean movedToOccupiedGrid(Tile loc) {
+	public boolean movedToOccupiedGrid(Tile loc,MovementType dir) {
 		
-		System.out.println(getName()+ " moved to space occupied by "+ loc.getObject().getName());
-		
+		FloorObject o = loc.getObject();		
+		if(o.getType().equalsIgnoreCase("Player")){
+			gameFloor.MoveAnotherObjectTo((Player)o, o.getX(), o.getY(), dir);
+			gameFloor.addkillPlayerAction((Player)o);
+			gameFloor.addkillPlayerAction(this);	
+			System.out.println(getName()+ " moved to space occupied by "+ o.getName());			
+		}else if(o.getType().equalsIgnoreCase("PowerUp")){
+			gameFloor.moveObjectTo(o, o.getX(), o.getY(), dir);
+			gameFloor.givePowerUp(this);
+			System.out.println(getName()+ " moved to space occupied by "+ o.getName());
+			System.out.println(getName()+ "has got a power up!");
+		}else{		
+			System.out.println(getName()+ " can not move to space occupied by "+ o.getName());		
+		}		
 		return false;
 	}
 

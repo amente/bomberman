@@ -26,8 +26,8 @@ public interface Movable {
 	 * Subclasses implement this to do the logic 
 	 * @param o
 	 * @return canAdvance
-	 */
-	public boolean movedToOccupiedGrid(Tile loc);
+	 */	
 	public boolean movedOutOfGrid();
+	public boolean movedToOccupiedGrid(Tile tile, MovementType dir);
 
 }

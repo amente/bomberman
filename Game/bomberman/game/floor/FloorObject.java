@@ -38,19 +38,19 @@ public class FloorObject{
 	}	
 	
 	public void moveLeft(){		
-		floor.moveObjectTo(this,x+1,y,MovementType.LEFT);
+		floor.moveObjectTo(this,x-1,y,MovementType.LEFT);
 	}	
 	
 	public void moveRight(){		
-		floor.moveObjectTo(this,x-1,y,MovementType.RIGHT);
+		floor.moveObjectTo(this,x+1,y,MovementType.RIGHT);
 	}	
 	
 	public void moveUp(){		
-		floor.moveObjectTo(this,x,y+1,MovementType.UP);
+		floor.moveObjectTo(this,x,y-1,MovementType.UP);
 	}	
 	
 	public void moveDown(){		
-		floor.moveObjectTo(this,x,y-1,MovementType.DOWN);
+		floor.moveObjectTo(this,x,y+1,MovementType.DOWN);
 	}
 
 

@@ -10,14 +10,14 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
 
-import bomberman.game.GameResolver;
-
 public class Game extends BasicGame{
 
-	private TiledMap map;
-	private GameResolver resolver;
+	private TiledMap map;	
 	private Animation sprite,up,down,left,right;
+	
+	private Image bombImage;
 	private float x = 64f, y = 52f;
+	private int xPos = 1, yPos = 1;
 	
     public Game()
     {
@@ -38,6 +38,7 @@ public class Game extends BasicGame{
 		// TODO Auto-generated method stub
 		loadMap();
 		loadMovements();
+		bombImage = new Image("Resources/bomb.png");
 	}
 
 	@Override
@@ -51,17 +52,32 @@ public class Game extends BasicGame{
             
                 sprite.update(delta);                
                 y -= delta * 0.1f;
-                System.out.println("x: "+x+" y: "+y);
-            
+               // yPos = (int) Math.ceil((y-40f) / 52f)-1;
+                //System.out.println("x: "+x+" y: "+y);
+               // System.out.println("yPos: "+yPos); 
+                int tmp = yPos;
+                yPos = (int) Math.ceil((y-40f) / 52f);
+                //System.out.println("x: "+x+" y: "+y);
+                //System.out.println("xPos: "+xPos);
+                if(yPos!=tmp){
+                	System.out.println("Move Up");
+                }
         }
         else if (input.isKeyDown(Input.KEY_DOWN))
         {
             sprite = down;
            
                 sprite.update(delta);
-                y += delta * 0.1f;
-                System.out.println("x: "+x+" y: "+y);
-            
+                y += delta * 0.1f;              
+                //System.out.println("x: "+x+" y: "+y);
+                //System.out.println("yPos: "+yPos);
+                int tmp = yPos;
+                yPos = (int) Math.ceil((y-40f) / 52f);
+                //System.out.println("x: "+x+" y: "+y);
+                //System.out.println("xPos: "+xPos);
+                if(yPos!=tmp){
+                	System.out.println("Move Down");
+                }
         }
         else if (input.isKeyDown(Input.KEY_LEFT))
         {
@@ -69,7 +85,15 @@ public class Game extends BasicGame{
            
                 sprite.update(delta);
                 x -= delta * 0.1f;
-                System.out.println("x: "+x+" y: "+y);
+                //System.out.println("x: "+x+" y: "+y);
+                //System.out.println("xPos: "+xPos);
+                int tmp = xPos;
+                xPos = (int) Math.ceil((x-30f) / 64f) ;
+                //System.out.println("x: "+x+" y: "+y);
+                //System.out.println("xPos: "+xPos);
+                if(xPos!=tmp){
+                	System.out.println("Move Left");
+                }
            
         }
         else if (input.isKeyDown(Input.KEY_RIGHT))
@@ -78,7 +102,19 @@ public class Game extends BasicGame{
            
                 sprite.update(delta);
                 x += delta * 0.1f;
-                System.out.println("x: "+x+" y: "+y);
+                int tmp = xPos;
+                xPos = (int) Math.ceil((x-30f) / 64f) ;
+                //System.out.println("x: "+x+" y: "+y);
+                //System.out.println("xPos: "+xPos);
+                if(xPos!=tmp){
+                	System.out.println("Move Right");
+                }
+        }
+        else if(input.isKeyDown(Input.KEY_SPACE))
+        {
+        	
+        	 bombImage.draw(x, delta);
+        	
         }
 		
 		

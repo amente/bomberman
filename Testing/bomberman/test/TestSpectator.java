@@ -103,7 +103,14 @@ public class TestSpectator extends BasicGame{
 								if(object!=null){
 									object.setLocation(x, y,MovementType.getMovement(dir));
 								}
-						} 
+						}else if (update.getType().equals(GameStateUpdate.UpdateType.DEL)) {				
+						
+							String name = update
+									.getParameter("OBJECT_NAME");									
+						    System.out.println("Remove "+name);
+							objects.get(name).setRedraw(false);
+							
+					}  
 
 					}
 			}
@@ -181,6 +188,7 @@ public class TestSpectator extends BasicGame{
 		private String name;
 		private int x,y ;	
 		private boolean loaded = false;
+		private boolean redraw = true;
 		
 		public GUIPlayer(String name,int xPos,int yPos) throws SlickException{			
 			this.name = name;
@@ -228,11 +236,20 @@ public class TestSpectator extends BasicGame{
 		
 		public void redraw() throws SlickException{
 			// TODO: Look for a better solution than checking loaded 
+			if(!redraw ){return;}
+			
 			if(!loaded){
 				loadMovements();
 				loaded = true;
 			}
 			sprite.draw(64f*x ,52f*y );
+		}
+
+
+		@Override
+		public void setRedraw(boolean b) {
+			// TODO Auto-generated method stub
+			redraw = b;
 		}
 		
 		
@@ -240,12 +257,13 @@ public class TestSpectator extends BasicGame{
 		
 	}
 	
-	private class GUIBomb implements GUIObject{
+	public class GUIBomb implements GUIObject{
 		
 		private Image image;
 		private String id;
 		private int x,y ;	
 		private boolean loaded = false;
+		private boolean redraw = true;
 		
 		public GUIBomb(String id,int xPos,int yPos) throws SlickException{			
 			this.id = id;
@@ -257,6 +275,7 @@ public class TestSpectator extends BasicGame{
 		
 		public void redraw() throws SlickException{
 			// TODO: Look for a better solution than checking loaded 
+			if(!redraw  ){return;}
 			if(!loaded){
 				loadImage();
 				loaded = true;
@@ -267,6 +286,12 @@ public class TestSpectator extends BasicGame{
 		
 		private void loadImage() throws SlickException{
 			image = new Image("Resources/bomb.png");
+		}
+
+
+		@Override
+		public void setRedraw(boolean b) {
+			redraw = b;			
 		}
 		
 		

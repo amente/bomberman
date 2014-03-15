@@ -84,7 +84,7 @@ public class GameServer extends Thread {
 				
 	}
 
-	public void addAction(GameAction action) {
+	public synchronized void addAction(GameAction action) {
 		producer.produce(action);
 	}
 	
