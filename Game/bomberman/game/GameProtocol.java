@@ -37,10 +37,18 @@ public class GameProtocol {
 		return theProtocol;
 	}	
 	
-	public GameAction getAction(DatagramPacket packet){	
-		// TODO: Parse the message according to the protocol and make an action
+	public GameAction getAction(DatagramPacket packet) {
 		String message = new String(packet.getData(),packet.getOffset(),packet.getLength());
 		NetworkAddress senderAddress = new NetworkAddress(packet.getSocketAddress());
+		GameAction action = getAction(message);
+
+		action.setSenderAddress(senderAddress);
+		return action;
+	}
+	
+	public GameAction getAction(String message){	
+		// TODO: Parse the message according to the protocol and make an action
+		
 		String[] params = message.split(" ", 2);
 		if(params.length < 1) { return null;}
 		
@@ -53,12 +61,10 @@ public class GameProtocol {
 				action = new GameAction();
 				action.setType(GameAction.Type.GAME);
 				action.addParameter("CALL", "JOIN");
-				action.setSenderAddress(senderAddress);
 			} else if (params[1].equalsIgnoreCase("START")) {
 				action = new GameAction();
 				action.setType(GameAction.Type.GAME);
 				action.addParameter("CALL", "START");
-				action.setSenderAddress(senderAddress);
 			}
 		}
 
@@ -79,11 +85,7 @@ public class GameProtocol {
 
 		}
 
-		// Bind action to sender address
-		action.setSenderAddress(senderAddress);
 		return action;
-		
-		
 	}
 
 

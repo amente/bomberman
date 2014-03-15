@@ -22,7 +22,10 @@ public class GameResolver extends Thread{
 	public GameResolver(GameServer gameServer){
 		super("GameResolver");
 		this.gameServer = gameServer;		
-		consumer = new Consumer<GameAction>(gameServer.getMessageBuffer());		
+		
+		if (gameServer != null) {
+			consumer = new Consumer<GameAction>(gameServer.getMessageBuffer());		
+		}
 		
 		gameFloor = new Floor();	
 		bombFactory  = new BombFactory();
@@ -41,17 +44,21 @@ public class GameResolver extends Thread{
 		}		
 	}	
 	
+	private void processMessages() {
+		GameAction action = consumer.consume();	
+		if(action == null){return;}
+		
+		processAction(action);
+	}
+	
 	/**
 	 * Remove messages from the server queue and process them
 	 */
-	private void processMessages(){		
-		GameAction action  =  consumer.consume();	
-		if(action == null){return;}
-		
+	public void processAction(GameAction action){	
 		if (!senderHasJoinedGame(action.getSenderAddress(), gameFloor) && !action.isFromServer()) {
 			return;
-		}		
-					
+		}
+		
 		GameAction.Type t = action.getType();
 		
 		switch(t){		

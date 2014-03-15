@@ -49,10 +49,18 @@ public class Floor {
 	
 	Random rand = new Random();
 	
-	public Floor(){	
+	public Floor() {
+		this(false);
+	}
+	
+	public Floor(boolean isTest){	
 		gameStateUpdates = new SingleBuffer<GameStateUpdate>(10);
 		producer = new Producer<GameStateUpdate>(gameStateUpdates);
-		initialize();		
+		if (!isTest) {
+			initialize();
+		} else {
+			testInitialize();
+		}
 	}	
 	
 	private void initialize(){
@@ -60,6 +68,21 @@ public class Floor {
 		xSize = tiles[0].length;
 		ySize = tiles.length;
 		players = new HashMap<NetworkAddress,Player>();
+	}
+	
+	private void testInitialize() {
+		players = new HashMap<NetworkAddress,Player>();
+		xSize = 20;
+		ySize = 20;
+		tiles = new Tile[ySize][xSize];
+		
+		for (int y = 0; y < ySize; y++) {
+			for (int x = 0; x < xSize; x++) {
+				if (x == 0 || y == 0 || x == xSize-1 || y == ySize-1) {
+					tiles[y][x] = new Tile(x, y, new Brick(this));
+				}
+			}
+		}
 	}
 	
 	public boolean moveObjectTo(FloorObject o,int x,int y,MovementType dir)
@@ -140,13 +163,23 @@ public class Floor {
 		return players.get(addr);
 	}
 	
+	public Player getPlayer(String name) {
+		for(Player p : players.values()) {
+			if (p.getName().equals(name)) {
+				return p;
+			}
+		}
+		
+		return null;
+	}
+	
 	/**
 	 * Adds a player to the game floor at a specified location
 	 * @param player
 	 * @param x
 	 * @param y
 	 */
-	private String addPlayer(NetworkAddress playerAddress,int x, int y) {
+	public String addPlayer(NetworkAddress playerAddress,int x, int y) {
 		
 		if (players.containsKey(playerAddress)){
 			System.out.println(players.get(playerAddress).getName()+ " already in game");
