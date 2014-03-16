@@ -63,4 +63,8 @@ public class FloorObject{
 		this.type = type;
 	}				
 	
+	public void setName(String name){
+		this.name = name;
+	}
+	
 }	

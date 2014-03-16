@@ -1,12 +1,13 @@
 package bomberman.game;
 
+import java.util.concurrent.ArrayBlockingQueue;
+
 import bomberman.game.floor.Bomb;
 import bomberman.game.floor.BombFactory;
 import bomberman.game.floor.BombScheduler;
 import bomberman.game.floor.Floor;
 import bomberman.game.floor.Player;
 import bomberman.game.network.NetworkAddress;
-import bomberman.utils.buffer.Consumer;
 
 public class GameResolver extends Thread{
 	
@@ -17,12 +18,12 @@ public class GameResolver extends Thread{
 	private GameStateUpdater clientUpdater;
 	
 	
-	private Consumer<GameAction> consumer;
+	private ArrayBlockingQueue consumer;
 		
 	public GameResolver(GameServer gameServer){
 		super("GameResolver");
 		this.gameServer = gameServer;		
-		consumer = new Consumer<GameAction>(gameServer.getMessageBuffer());		
+		consumer =gameServer.getMessageBuffer();		
 		
 		gameFloor = new Floor(this);	
 		bombFactory  = new BombFactory();
@@ -45,7 +46,7 @@ public class GameResolver extends Thread{
 	 * Remove messages from the server queue and process them
 	 */
 	private void processMessages(){		
-		GameAction action  =  consumer.consume();	
+		GameAction action  =  (GameAction) consumer.poll();	
 		if(action == null){return;}
 		
 		if (!senderHasJoinedGame(action.getSenderAddress(), gameFloor) && !action.isFromServer()) {

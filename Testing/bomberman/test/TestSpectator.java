@@ -1,6 +1,7 @@
 package bomberman.test;
 
 import java.util.HashMap;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.AppGameContainer;
@@ -13,16 +14,15 @@ import org.newdawn.slick.tiled.TiledMap;
 
 import bomberman.game.GameStateUpdate;
 import bomberman.game.floor.Movable.MovementType;
-import bomberman.gui.Game;
 import bomberman.gui.GUIObject;
+import bomberman.gui.Game;
 import bomberman.test.TestDriver.TestPlayer;
-import bomberman.utils.buffer.Consumer;
 
 public class TestSpectator extends BasicGame{
 
 	private TiledMap map;	
 		
-	Consumer<GameStateUpdate> consumer;
+	ArrayBlockingQueue<GameStateUpdate> consumer;
 	private HashMap<String,GUIObject> objects;
 	private Thread consumerThread;
 	
@@ -30,7 +30,7 @@ public class TestSpectator extends BasicGame{
     {
         super("Bomberman Test Spectator");     
         objects = new HashMap<String,GUIObject>(4); 
-        consumer = new Consumer<GameStateUpdate>(player.getGameStateUpdates());
+        consumer = player.getGameStateUpdates();
         
            
         consumerThread= new Thread(new Runnable(){
@@ -38,8 +38,9 @@ public class TestSpectator extends BasicGame{
 			@Override
 			public void run() {
 				while(true){
-					GameStateUpdate update = consumer.consume();
+					GameStateUpdate update = consumer.poll();
 					if (update != null) {
+						System.out.println("Recieved Update:"+update.getType());
 						if (update.getType().equals(GameStateUpdate.UpdateType.NEW)) {
 							String objectType = update.getParameter("OBJECT_TYPE");
 							if (objectType.equalsIgnoreCase("PLAYER")) {
@@ -65,7 +66,7 @@ public class TestSpectator extends BasicGame{
 							}else if(objectType.equalsIgnoreCase("BOMB")){
 								
 								String id = update
-										.getParameter("OBJECT_NAME") + update.hashCode();
+										.getParameter("OBJECT_NAME");
 								
 								int x = Integer.parseInt(update
 										.getParameter("X_LOC"));
@@ -102,6 +103,7 @@ public class TestSpectator extends BasicGame{
 								GUIPlayer object = (GUIPlayer)(objects.get(name));
 								if(object!=null){
 									object.setLocation(x, y,MovementType.getMovement(dir));
+									System.out.println("Moved object to x: "+x+" y:"+y);
 								}
 						}else if (update.getType().equals(GameStateUpdate.UpdateType.DEL)) {				
 						
@@ -110,7 +112,15 @@ public class TestSpectator extends BasicGame{
 						    System.out.println("Remove "+name);
 							objects.get(name).setRedraw(false);
 							
+					}else if (update.getType().equals(GameStateUpdate.UpdateType.EXPLODEBOMB)) {				
+						
+						String name = update
+								.getParameter("OBJECT_NAME");									
+					    System.out.println("Explode bomb "+name);
+						((GUIBomb) objects.get(name)).setExplode(true);
+						
 					}  
+  
 
 					}
 			}
@@ -208,6 +218,7 @@ public class TestSpectator extends BasicGame{
 				break;
 			case LEFT:
 				sprite = left;
+				break;
 			default:
 				sprite = right;			
 			}
@@ -250,50 +261,67 @@ public class TestSpectator extends BasicGame{
 		public void setRedraw(boolean b) {
 			// TODO Auto-generated method stub
 			redraw = b;
-		}
-		
-		
-		
-		
+		}		
 	}
 	
 	public class GUIBomb implements GUIObject{
 		
+		
+		//private Animation explosionAnimation;
+		private Image exploded;
+		private Image unexploded;
 		private Image image;
 		private String id;
-		private int x,y ;	
-		private boolean loaded = false;
+		private int x,y ;			
 		private boolean redraw = true;
+		public int explodeTimout = 5000;
+		private boolean explode = false;
+		private boolean loaded = false;
+		
 		
 		public GUIBomb(String id,int xPos,int yPos) throws SlickException{			
 			this.id = id;
 			x = xPos ;
 			y = yPos;	
-			System.out.println("x: "+x+" y: "+y);
+			System.out.println("x: "+x+" y: "+y);						
 		}
 		
 		
 		public void redraw() throws SlickException{
 			// TODO: Look for a better solution than checking loaded 
-			if(!redraw  ){return;}
+			if(!redraw  ){return;}		
 			if(!loaded){
-				loadImage();
+				loadImages();
 				loaded = true;
 			}
 			image.draw(64f*x ,52f*y );
+			if(explode){
+				if(explodeTimout==0){
+					//setRedraw(false);
+				}
+				explodeTimout--;				
+			}
 		}
 		
 		
-		private void loadImage() throws SlickException{
-			image = new Image("Resources/bomb.png");
+		private void loadImages() throws SlickException{
+			unexploded = new Image("Resources/bomb.png");
+			exploded = new Image("Resources/sprite/up_1.png");
+			image = unexploded;
 		}
-
+		
 
 		@Override
 		public void setRedraw(boolean b) {
 			redraw = b;			
 		}
 		
+		
+		public void setExplode(boolean b){			
+			image = exploded;
+			explode = true;
+			System.out.println("Exploded Bomb");
+		}
 		
 	}
 	

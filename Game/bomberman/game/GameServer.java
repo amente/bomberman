@@ -2,12 +2,10 @@ package bomberman.game;
 
 import java.net.DatagramPacket;
 import java.net.SocketException;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import bomberman.game.network.NetworkAddress;
 import bomberman.game.network.NetworkManager;
-import bomberman.utils.buffer.IBuffer;
-import bomberman.utils.buffer.Producer;
-import bomberman.utils.buffer.SingleBuffer;
 
 
 public class GameServer extends Thread {
@@ -17,8 +15,8 @@ public class GameServer extends Thread {
 	private boolean gameFinished = false;
 	private boolean gameStarted = false;
 		
-	private IBuffer<GameAction> messageBuffer; // Thread safe FIFO Queue
-	private Producer<GameAction> producer;
+	private ArrayBlockingQueue<GameAction> messageBuffer; // Thread safe FIFO Queue
+	//private Producer<GameAction> producer;
 	
 		
 	public GameServer(int port) throws SocketException{
@@ -26,8 +24,8 @@ public class GameServer extends Thread {
 		
 		networkManager = new NetworkManager(port);
 		
-		messageBuffer = new SingleBuffer<GameAction>(Application.QUEUE_CAPACITY);	
-		producer = new Producer<GameAction>(messageBuffer);
+		messageBuffer = new ArrayBlockingQueue<GameAction>(Application.QUEUE_CAPACITY);	
+		//producer = new Producer<GameAction>(messageBuffer);
 		
 	}	
 	
@@ -41,9 +39,8 @@ public class GameServer extends Thread {
 	public boolean listenForGameCommands(){		
 		DatagramPacket packet = networkManager.receiveAsynchronous(0,true);		
 		
-		GameAction action = GameProtocol.getInstance().getAction(packet);		
-		
-		producer.produce(action);			
+		GameAction action = GameProtocol.getInstance().getAction(packet);			
+		addAction(action);
 		return true;
 	}
 		
@@ -64,7 +61,7 @@ public class GameServer extends Thread {
 		networkManager.close();
 	}
 	
-	public IBuffer<GameAction> getMessageBuffer(){
+	public ArrayBlockingQueue<GameAction> getMessageBuffer(){
 		return messageBuffer;
 	}
 		
@@ -84,8 +81,13 @@ public class GameServer extends Thread {
 				
 	}
 
-	public synchronized void addAction(GameAction action) {
-		producer.produce(action);
+	public void addAction(GameAction action) {
+		try {
+			messageBuffer.put(action);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		};
 	}
 	
 	public NetworkManager getNetworkManager(){

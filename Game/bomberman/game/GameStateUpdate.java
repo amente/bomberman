@@ -65,9 +65,9 @@ public class GameStateUpdate {
 			parameters.put("OBJECT_NAME",tokens[2]);
 			parameters.put("X_LOC",tokens[3]);
 			parameters.put("Y_LOC",tokens[4]);
-		}else if(stype.equalsIgnoreCase(UpdateType.BOMB.name())){
-			type = UpdateType.BOMB;
-			parameters.put("STATUS", tokens[1]);			
+		}else if(stype.equalsIgnoreCase(UpdateType.EXPLODEBOMB.name())){
+			type = UpdateType.EXPLODEBOMB;	
+			parameters.put("OBJECT_NAME",tokens[1]);
 			parameters.put("X_LOC",tokens[2]);
 			parameters.put("Y_LOC",tokens[3]);
 		}else if(stype.equalsIgnoreCase(UpdateType.DEL.name())){
@@ -99,8 +99,8 @@ public class GameStateUpdate {
 	
 		
 	public static GameStateUpdate makeUpdateForExplodeBomb(Bomb b){
-		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.BOMB);		
-		update.addParameter("STATUS", "EXPLODE");
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.EXPLODEBOMB);
+		update.addParameter("OBJECT_NAME", b.getName());
 		update.addParameter("X_LOC", ""+b.getX());
 		update.addParameter("Y_LOC", ""+b.getY());
 		return update;		
@@ -133,7 +133,7 @@ public class GameStateUpdate {
 		GAME, 
 		DEL,
 		MOVE,
-		BOMB
+		EXPLODEBOMB
 	}
 	
 	

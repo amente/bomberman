@@ -18,6 +18,7 @@ public class BombFactory {
 	
 	public Bomb makeBombFor(Player player,Floor floor){
 		Bomb bomb = new Bomb(floor);
+		bomb.setName(bomb.getName()+bomb.hashCode());
 		floor.addNewObject(bomb, player.getX(),player.getY());			
 		producer.produce(bomb);
 		return bomb;	

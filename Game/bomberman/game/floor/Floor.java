@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
@@ -16,8 +17,6 @@ import bomberman.game.GameResolver;
 import bomberman.game.GameStateUpdate;
 import bomberman.game.floor.Movable.MovementType;
 import bomberman.game.network.NetworkAddress;
-import bomberman.utils.buffer.Producer;
-import bomberman.utils.buffer.SingleBuffer;
 
 
 /**
@@ -42,8 +41,8 @@ public class Floor {
 	private ArrayList<Tile> emptyTiles = new ArrayList<Tile>() ;
 	private GameResolver gameResolver;
 	
-    private SingleBuffer<GameStateUpdate> gameStateUpdates;
-	private Producer<GameStateUpdate> producer;
+    private ArrayBlockingQueue<GameStateUpdate> gameStateUpdates;
+	//private Producer<GameStateUpdate> producer;
 	
 	private Tile[][] tiles;
 	private TiledMap map;
@@ -53,8 +52,8 @@ public class Floor {
 	Random rand = new Random();
 	
 	public Floor(GameResolver gameResolver){	
-		gameStateUpdates = new SingleBuffer<GameStateUpdate>(10);
-		producer = new Producer<GameStateUpdate>(gameStateUpdates);
+		gameStateUpdates = new ArrayBlockingQueue<GameStateUpdate>(10);
+		//producer = new Producer<GameStateUpdate>(gameStateUpdates);
 		this.gameResolver = gameResolver;
 		initialize();		
 	}	
@@ -82,23 +81,45 @@ public class Floor {
 			//System.out.println("x: " + x + " y: " + y);
 			tiles[x][y].replaceObject(o); // Move to new location 
 			System.out.println(o.getName()+" moved to "+x+","+y);
-			producer.produce(GameStateUpdate.makeUpdateForMove(o,dir));
+			addUpdate(GameStateUpdate.makeUpdateForMove(o,dir));
 			return true;
 		}else{
 			//Moved to occupied space, what to do with it? Callback
 			return ((Movable)o).movedToOccupiedGrid(tiles[x][y],dir);
 		}		
 	}	
+	
+	public void MoveAnotherObjectTo(FloorObject o, int x, int y,
+			MovementType dir) {
+		    
+			tiles[o.getX()][o.getY()].removeObject(); // Remove from previous location	
+			emptyTiles.add(tiles[o.getX()][o.getY()]);
+			
+			o.setLocationTo(x, y);
+			tiles[x][y].addAnother(o);	
+			System.out.println(o.getName()+" moved to "+x+","+y);
+			addUpdate(GameStateUpdate.makeUpdateForMove(o,dir));
+	
+	}
 		
+	private void addUpdate(GameStateUpdate makeUpdateForMove) {
+		try {
+			gameStateUpdates.put(makeUpdateForMove);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+
 	public void addNewObject(FloorObject o,int x,int y){		
 		if(tiles[x][y].getObject() == null){
 			tiles[x][y].replaceObject(o);	
 			o.setLocationTo(x, y);
-			producer.produce(GameStateUpdate.makeUpdateForAddObject(o));
+			addUpdate(GameStateUpdate.makeUpdateForAddObject(o));
 		}else{
 			tiles[x][y].addAnother(o);	
 			o.setLocationTo(x, y); 
-			producer.produce(GameStateUpdate.makeUpdateForAddObject(o));
+			addUpdate(GameStateUpdate.makeUpdateForAddObject(o));
 		}
 	}
 	
@@ -172,10 +193,10 @@ public class Floor {
 	
 	public void explodeBomb(Bomb bomb){		
 		System.out.println("Bomb Exploded"+" x:"+bomb.getX()+" y:"+bomb.getY());
-		producer.produce(GameStateUpdate.makeUpdateForExplodeBomb(bomb));		
+		addUpdate(GameStateUpdate.makeUpdateForExplodeBomb(bomb));		
 	}	
 		
-	public SingleBuffer<GameStateUpdate> getGameStateUpdateBuffer(){
+	public ArrayBlockingQueue<GameStateUpdate> getGameStateUpdateBuffer(){
 		return gameStateUpdates;
 	}
 	
@@ -272,9 +293,10 @@ public class Floor {
 			public int y;
 			Tile(int x, int y,FloorObject o){				
 				this.x = x;
-				this.y = y;
+				this.y = y;				
 				objects = new LinkedList<FloorObject>();
 				if(o!=null){
+					o.setLocationTo(x,y);
 					objects.add(o);
 				}
 			}	
@@ -353,18 +375,12 @@ public class Floor {
 		
 	}
 
-	public void MoveAnotherObjectTo(FloorObject o, int x, int y,
-			MovementType dir) {
-			tiles[x][y].addAnother(o);	
-			o.setLocationTo(x, y);
-			producer.produce(GameStateUpdate.makeUpdateForMove(o,dir));
 	
-	}
 
 	public void killPlayer(Player p) {
 		tiles[p.getX()][p.getY()].removeObject();	
 		System.out.println(p.getName()+ "died!");		
-		producer.produce(GameStateUpdate.makeUpdateForRemoveObject(p));		
+		  addUpdate(GameStateUpdate.makeUpdateForRemoveObject(p));		
 		//players.remove(p.getAddress());
 	}
 	

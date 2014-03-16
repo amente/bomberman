@@ -8,6 +8,7 @@ import java.net.DatagramPacket;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
@@ -16,8 +17,6 @@ import org.newdawn.slick.SlickException;
 import bomberman.game.GameStateUpdate;
 import bomberman.game.network.NetworkAddress;
 import bomberman.game.network.NetworkManager;
-import bomberman.utils.buffer.Producer;
-import bomberman.utils.buffer.SingleBuffer;
 
 public class TestDriver {
 	public static void main(String args[]) {
@@ -49,7 +48,7 @@ public class TestDriver {
 				String nextLine = reader.readLine();
 				commands = new ArrayList<String>();
 				while(nextLine!=null && !nextLine.equalsIgnoreCase("END")){				
-					commands.add(reader.readLine());
+					commands.add(nextLine);					
 					nextLine = reader.readLine();
 				}
 				playerCommands.add(commands);
@@ -112,6 +111,12 @@ public class TestDriver {
 			}							
 		}	
 		
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -123,8 +128,8 @@ public class TestDriver {
 		String playerName ;
 		Timer timer;
 						
-		private SingleBuffer<GameStateUpdate> gameStateUpdates;
-		private Producer<GameStateUpdate> producer;
+		private ArrayBlockingQueue<GameStateUpdate> gameStateUpdates;
+		//private Producer<GameStateUpdate> producer;
 		
 		TestPlayer(ArrayList<String> commands,int serverPort,String serverAddress){
 			try {
@@ -135,8 +140,8 @@ public class TestDriver {
 			    e.printStackTrace();
 			}
 			
-			gameStateUpdates = new SingleBuffer<GameStateUpdate>(10);
-			producer = new Producer<GameStateUpdate>(gameStateUpdates);
+			gameStateUpdates = new ArrayBlockingQueue<GameStateUpdate>(10);
+			//producer = new Producer<GameStateUpdate>(gameStateUpdates);
 			timer = new Timer();			
 		}		
 		
@@ -154,10 +159,15 @@ public class TestDriver {
 		public void listenAndPrintUpdates(){			
 			DatagramPacket packet = networkManager.receiveAsynchronous(50, true);
 			if(packet!=null){
-				System.out.println(playerName+" Recieved Updates:");
+				//System.out.println(playerName+" Recieved Updates:");
 				String message = new String(packet.getData(),packet.getOffset(),packet.getLength());
-				producer.produce(new GameStateUpdate(message));
-				System.out.println(message);
+				try {
+					gameStateUpdates.put((new GameStateUpdate(message)));
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				//System.out.println(message);
 			}
 		}
 		
@@ -193,11 +203,12 @@ public class TestDriver {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}	
-			}			
+			}
 			
+			while(true);
 		}
 		
-		public SingleBuffer<GameStateUpdate> getGameStateUpdates(){
+		public ArrayBlockingQueue<GameStateUpdate> getGameStateUpdates(){
 				return gameStateUpdates;
 		}		
 	}

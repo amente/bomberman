@@ -22,15 +22,20 @@ public class Player extends FloorObject implements Movable {
 		
 		FloorObject o = loc.getObject();		
 		if(o.getType().equalsIgnoreCase("Player")){
-			gameFloor.MoveAnotherObjectTo((Player)o, o.getX(), o.getY(), dir);
+			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);
 			gameFloor.addkillPlayerAction((Player)o);
 			gameFloor.addkillPlayerAction(this);	
 			System.out.println(getName()+ " moved to space occupied by "+ o.getName());			
 		}else if(o.getType().equalsIgnoreCase("PowerUp")){
-			gameFloor.moveObjectTo(o, o.getX(), o.getY(), dir);
+			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);
 			gameFloor.givePowerUp(this);
 			System.out.println(getName()+ " moved to space occupied by "+ o.getName());
 			System.out.println(getName()+ "has got a power up!");
+		}else if(o.getType().equalsIgnoreCase("Door")){
+			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);
+			System.out.println(getName()+ " has reached the door!");
+			System.out.println(getName()+ " wins!");
+			System.out.println(" Game Over!");
 		}else{		
 			System.out.println(getName()+ " can not move to space occupied by "+ o.getName());		
 		}		
