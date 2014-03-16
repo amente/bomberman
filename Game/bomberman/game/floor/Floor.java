@@ -50,13 +50,20 @@ public class Floor {
 	private int xSize;
 	private int ySize;
 	
+	public int getXSize() { return xSize; }
+	public int getYSize() { return ySize; }
+	
 	Random rand = new Random();
 	
-	public Floor(GameResolver gameResolver){	
+	public Floor(GameResolver gameResolver, boolean isTest){	
 		gameStateUpdates = new SingleBuffer<GameStateUpdate>(10);
 		producer = new Producer<GameStateUpdate>(gameStateUpdates);
 		this.gameResolver = gameResolver;
-		initialize();		
+		if (!isTest) {
+			initialize();
+		} else {
+			testInitialize();
+		}
 	}	
 	
 	private void initialize(){
@@ -72,10 +79,13 @@ public class Floor {
 		ySize = 20;
 		tiles = new Tile[ySize][xSize];
 		
-		for (int y = 0; y < ySize; y++) {
-			for (int x = 0; x < xSize; x++) {
+		for (int x = 0; x < xSize; x++) {
+			for (int y = 0; y < ySize; y++) {
 				if (x == 0 || y == 0 || x == xSize-1 || y == ySize-1) {
-					tiles[y][x] = new Tile(x, y, new Brick(this));
+					tiles[x][y] = new Tile(x, y, new Wall(this));;
+				} else {
+					tiles[x][y] = new Tile(x,y,null);
+					emptyTiles.add(tiles[x][y]);
 				}
 			}
 		}

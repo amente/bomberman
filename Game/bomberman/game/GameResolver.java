@@ -19,7 +19,11 @@ public class GameResolver extends Thread{
 	
 	private Consumer<GameAction> consumer;
 		
-	public GameResolver(GameServer gameServer){
+	public GameResolver(GameServer gameServer) {
+		this(gameServer, false);
+	}
+	
+	public GameResolver(GameServer gameServer, boolean isTest){
 		super("GameResolver");
 		this.gameServer = gameServer;		
 		
@@ -27,7 +31,8 @@ public class GameResolver extends Thread{
 			consumer = new Consumer<GameAction>(gameServer.getMessageBuffer());		
 		}
 		
-		gameFloor = new Floor(this);	
+		gameFloor = new Floor(this, isTest);
+		
 		bombFactory  = new BombFactory();
 		bombScheduler = new BombScheduler(bombFactory,this);
 		

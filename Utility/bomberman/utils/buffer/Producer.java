@@ -25,7 +25,10 @@ public class Producer<T> {
 			
 			bufferController.handleFullBuffer(this);
 			
-			buffer.add(item);
+			synchronized(buffer) {
+				buffer.add(item);
+			}
+			
 			lock.notify();
 			
 			bufferController.handleFullBuffer(this);

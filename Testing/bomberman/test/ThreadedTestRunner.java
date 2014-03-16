@@ -25,4 +25,24 @@ public class ThreadedTestRunner {
 		
 		return true;
 	}
+	
+	public static boolean RunTests(Runnable[] tests) {
+		Thread[] threads = new Thread[tests.length];
+		
+		for (int i = 0; i < tests.length; i++) {
+			Thread t = new Thread(tests[i]);
+			threads[i] = t;
+			t.start();
+		}
+		
+		for (int i = 0; i < tests.length; i++){
+			try {
+				threads[i].join();
+			} catch (InterruptedException e) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
 }

@@ -30,7 +30,12 @@ public class Consumer<T> {
 			
 			bufferController.handleEmptyBuffer(this);
 			
-			T ret = buffer.remove();
+			T ret = null;
+			
+			synchronized(buffer) {
+				ret = buffer.remove();
+			}
+			
 			lock.notify();
 
 			return ret;
