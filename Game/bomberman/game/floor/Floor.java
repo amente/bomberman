@@ -5,14 +5,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
 
-import bomberman.game.GameAction;
+import bomberman.game.GameEvent;
 import bomberman.game.GameResolver;
 import bomberman.game.GameStateUpdate;
 import bomberman.game.floor.Movable.MovementType;
@@ -29,6 +29,7 @@ public class Floor {
 	
 	//For testing only
 	boolean next = false;
+	private int addedUpdates = 0;
 	
 	public static final int DEFAULTX = 0; // Default location for an object on the floor
 	public static final int DEFAULTY = 0; 
@@ -41,8 +42,7 @@ public class Floor {
 	private ArrayList<Tile> emptyTiles = new ArrayList<Tile>() ;
 	private GameResolver gameResolver;
 	
-    private ArrayBlockingQueue<GameStateUpdate> gameStateUpdates;
-	//private Producer<GameStateUpdate> producer;
+    private ArrayBlockingQueue<GameStateUpdate> gameStateUpdateQueue;
 	
 	private Tile[][] tiles;
 	private TiledMap map;
@@ -51,8 +51,9 @@ public class Floor {
 	
 	Random rand = new Random();
 	
+	
 	public Floor(GameResolver gameResolver){	
-		gameStateUpdates = new ArrayBlockingQueue<GameStateUpdate>(10);
+		gameStateUpdateQueue = new ArrayBlockingQueue<GameStateUpdate>(500,true);
 		//producer = new Producer<GameStateUpdate>(gameStateUpdates);
 		this.gameResolver = gameResolver;
 		initialize();		
@@ -80,8 +81,8 @@ public class Floor {
 			o.setLocationTo(x, y);
 			//System.out.println("x: " + x + " y: " + y);
 			tiles[x][y].replaceObject(o); // Move to new location 
-			System.out.println(o.getName()+" moved to "+x+","+y);
-			addUpdate(GameStateUpdate.makeUpdateForMove(o,dir));
+			//System.out.println(o.getName()+" moved to "+x+","+y);
+			addUpdate(GameStateUpdate.makeUpdateForMove(o,dir));			
 			return true;
 		}else{
 			//Moved to occupied space, what to do with it? Callback
@@ -97,20 +98,11 @@ public class Floor {
 			
 			o.setLocationTo(x, y);
 			tiles[x][y].addAnother(o);	
-			System.out.println(o.getName()+" moved to "+x+","+y);
+			//System.out.println(o.getName()+" moved to "+x+","+y);
 			addUpdate(GameStateUpdate.makeUpdateForMove(o,dir));
-	
+				
 	}
 		
-	private void addUpdate(GameStateUpdate makeUpdateForMove) {
-		try {
-			gameStateUpdates.put(makeUpdateForMove);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-	}
-
 	public void addNewObject(FloorObject o,int x,int y){		
 		if(tiles[x][y].getObject() == null){
 			tiles[x][y].replaceObject(o);	
@@ -123,20 +115,6 @@ public class Floor {
 		}
 	}
 	
-	/**
-	 * Get a string representation of the floor
-	 * @return
-	 */
-	public String getState(){
-		StringBuilder state = new StringBuilder();
-		for (Tile[] yGrid : tiles){
-			for(Tile l: yGrid){
-				state.append(l.getObject()==null?EMPTYNAME:l.getObject().getName());
-			}
-			state.append("\n");
-		}
-		return state.toString();
-	}
 	
 	/**
 	 * Adds a player to the floor, it picks up a random empty location
@@ -191,13 +169,70 @@ public class Floor {
 		return player.getName();
 	}
 	
+	
+	public Player getHostPlayer() {
+		return hostPlayer;
+	}
+
+	public void setHostPlayer(Player hostPlayer) {
+		this.hostPlayer = hostPlayer;
+	}
+
+	public boolean hasPlayer(NetworkAddress senderAddress) {
+		return players.containsKey(senderAddress);
+	}
+
+	public void addkillPlayerEvent(Player p) {
+		// TODO Auto-generated method stub
+		GameEvent event = new GameEvent();
+		event.setType(GameEvent.Type.KILL);
+		event.addParameter("PLAYER",p);	
+		event.setIsFromServer(true);
+		gameResolver.getGameServer().addEvent(event);
+	}
+
+	public void givePowerUp(Player player) {
+		// TODO Auto-generated method stub
+		
+	}	
+
+	public void killPlayer(Player p) {
+		tiles[p.getX()][p.getY()].removeObject();	
+		System.out.println(p.getName()+ "died!");	
+		 p.setIsAlive(false);
+		  addUpdate(GameStateUpdate.makeUpdateForRemoveObject(p));		
+		//players.remove(p.getAddress());
+	}
+	
+	public String createUniquePlayerID(){		
+		return "Player"+(players.size()+1);		
+	}	
+
+	public Set<NetworkAddress> getAddressOfAllPlayers() {
+		// TODO Auto-generated method stub
+		return players.keySet();
+	}
+
+	
+	
+	private void addUpdate(GameStateUpdate makeUpdateForMove) {
+		try {
+			gameStateUpdateQueue.put(makeUpdateForMove);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		addedUpdates++;
+		System.out.println("Added Updates: "+addedUpdates);
+	}
+	
 	public void explodeBomb(Bomb bomb){		
 		System.out.println("Bomb Exploded"+" x:"+bomb.getX()+" y:"+bomb.getY());
 		addUpdate(GameStateUpdate.makeUpdateForExplodeBomb(bomb));		
 	}	
 		
-	public ArrayBlockingQueue<GameStateUpdate> getGameStateUpdateBuffer(){
-		return gameStateUpdates;
+	public ArrayBlockingQueue<GameStateUpdate> getGameStateUpdateQueue(){
+		return gameStateUpdateQueue;
 	}
 	
 	
@@ -267,121 +302,32 @@ public class Floor {
         }		
 		
 	}	
+		
+	/**
+	 * Get a string representation of the floor
+	 * @return
+	 */
+	public String getState(){
+		StringBuilder state = new StringBuilder();
+		for (Tile[] yGrid : tiles){
+			for(Tile l: yGrid){
+				state.append(l.getObject()==null?EMPTYNAME:l.getObject().getName());
+			}
+			state.append("\n");
+		}
+		return state.toString();
+	}
 	
+
 	public void writeStateToFile(String filePath){
 			
 		//ToDo: Call getState() and Write the out put to file? 
 		
-	}
-		
-	public String createUniquePlayerID(){		
-		return "Player"+(players.size()+1);		
-	}
-	
-	/**
-	 * 
-	 * A Tile represents a grid location on a floor
-	 *   A tile will contain one or more objects, the objects are placed in order
-	 *   using a linked list
-	 *
-	 */
-	public class Tile{	
-		
-			private LinkedList<FloorObject> objects;
-		
-			public int x;
-			public int y;
-			Tile(int x, int y,FloorObject o){				
-				this.x = x;
-				this.y = y;				
-				objects = new LinkedList<FloorObject>();
-				if(o!=null){
-					o.setLocationTo(x,y);
-					objects.add(o);
-				}
-			}	
-			
-			/**
-			 * Adds an object to the back of the linkedlist
-			 * @param o
-			 */
-			public void addAnother(FloorObject o){
-				objects.add(o);
-			}
-			
-			/**
-			 * Replace the first object on the tile
-			 * @param o
-			 */
-			public void replaceObject(FloorObject o){
-				if(objects.size()>0){
-					objects.remove();
-				}
-				objects.addFirst(o);
-			}
-			
-			/**
-			 * Gets the first object on the tile
-			 * @return
-			 */
-			public FloorObject getObject(){
-				return objects.peekFirst();
-			}
-			
-			/**
-			 * Removes the first object on the tile
-			 */
-			public void removeObject(){
-				if(objects.size()>0){
-					objects.remove();
-				}
-			}
-			
-			
-	}
+	}		
+
 	
 	public TiledMap getMap(){
 		return map;
-	}
-
-	public NetworkAddress[] getAddressOfAllPlayers() {
-		// TODO Auto-generated method stub
-		return players.keySet().toArray(new NetworkAddress[0]);
-	}
-
-	public Player getHostPlayer() {
-		return hostPlayer;
-	}
-
-	public void setHostPlayer(Player hostPlayer) {
-		this.hostPlayer = hostPlayer;
-	}
-
-	public boolean hasPlayer(NetworkAddress senderAddress) {
-		return players.containsKey(senderAddress);
-	}
-
-	public void addkillPlayerAction(Player p) {
-		// TODO Auto-generated method stub
-		GameAction action = new GameAction();
-		action.setType(GameAction.Type.KILL);
-		action.addParameter("PLAYER",p);	
-		action.setIsFromServer();
-		gameResolver.getGameServer().addAction(action);
-	}
-
-	public void givePowerUp(Player player) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	
-
-	public void killPlayer(Player p) {
-		tiles[p.getX()][p.getY()].removeObject();	
-		System.out.println(p.getName()+ "died!");		
-		  addUpdate(GameStateUpdate.makeUpdateForRemoveObject(p));		
-		//players.remove(p.getAddress());
 	}
 	
 }

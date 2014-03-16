@@ -18,18 +18,17 @@ public class GameResolver extends Thread{
 	private GameStateUpdater clientUpdater;
 	
 	
-	private ArrayBlockingQueue consumer;
+	private ArrayBlockingQueue<GameEvent> gameEventQueue;
+	private int numEvents;
 		
 	public GameResolver(GameServer gameServer){
 		super("GameResolver");
 		this.gameServer = gameServer;		
-		consumer =gameServer.getMessageBuffer();		
+		gameEventQueue =gameServer.getMessageBuffer();		
 		
 		gameFloor = new Floor(this);	
 		bombFactory  = new BombFactory();
-		bombScheduler = new BombScheduler(bombFactory,this);
-		
-		
+		bombScheduler = new BombScheduler(bombFactory,this);		
 		clientUpdater = new GameStateUpdater(this);			
 	}	
 			
@@ -38,61 +37,62 @@ public class GameResolver extends Thread{
 		clientUpdater.start();	
 		bombScheduler.start();
 		while(gameServer.isRunning()){
-			processMessages();
+			processEvents();
 		}		
 	}	
 	
 	/**
 	 * Remove messages from the server queue and process them
 	 */
-	private void processMessages(){		
-		GameAction action  =  (GameAction) consumer.poll();	
-		if(action == null){return;}
+	private void processEvents(){		
+		GameEvent event  =  (GameEvent) gameEventQueue.poll();	
+		if(event == null){return;}
 		
-		if (!senderHasJoinedGame(action.getSenderAddress(), gameFloor) && !action.isFromServer()) {
+		if (!senderIsAllowed(event)) {
 			return;
 		}		
 					
-		GameAction.Type t = action.getType();
+		GameEvent.Type t = event.getType();
 		
 		switch(t){		
 			
 		case MOVE:
-			processMoveAction(action);
+			processMoveEvent(event);
 			break;					
 		case BOMB:
-			processBombAction(action);
+			processBombEvent(event);
 			break;	
-		case GAME:
-			processGameAction(action);
+		case GAMECHANGE:
+			processGameChangeEvent(event);
 			break;
 			
 		case EXPLOSION:
-			processExplosionAction(action);	
+			processExplosionAction(event);	
 			break;
 		case KILL:
-			processKillAction(action);
-		}	
-		
+			processKillEvent(event);
+		}
+		numEvents++;
+		System.out.println("Events Processed: "+numEvents);
 	}
 
-	private void processKillAction(GameAction action) {
-		if(!(action.getType() == GameAction.Type.KILL)){return;}
+	private void processKillEvent(GameEvent action) {
+		if(!(action.getType() == GameEvent.Type.KILL)){return;}
 		
 		Player p = (Player)(action.getParameter("PLAYER"));		
 		gameFloor.killPlayer(p);
 	}
 
-	private void processExplosionAction(GameAction action) {
-		if(!(action.getType() == GameAction.Type.EXPLOSION)){return;}
+	private void processExplosionAction(GameEvent action) {
+		if(!(action.getType() == GameEvent.Type.EXPLOSION)){return;}
 		
 		Bomb bomb = (Bomb)(action.getParameter("BOMB"));		
 		gameFloor.explodeBomb(bomb);
 		
 	}
 
-	private void processGameAction(GameAction action) {
-		if(!(action.getType() == GameAction.Type.GAME)){return;}
+	private void processGameChangeEvent(GameEvent action) {
+		if(!(action.getType() == GameEvent.Type.GAMECHANGE)){return;}
 		
 		String type = (String)(action.getParameter("CALL"));
 		
@@ -103,8 +103,8 @@ public class GameResolver extends Thread{
 		
 	}
 
-	private void processBombAction(GameAction action) {
-		if(!(action.getType() == GameAction.Type.BOMB)){return;}
+	private void processBombEvent(GameEvent action) {
+		if(!(action.getType() == GameEvent.Type.BOMB)){return;}
 		
 		Player player = null;
 		if(gameFloor.hasPlayer(action.getSenderAddress())){
@@ -118,8 +118,8 @@ public class GameResolver extends Thread{
 		bombFactory.makeBombFor(player,gameFloor);			
 	}
 	
-	private void processMoveAction(GameAction action) {
-		if(action.getType() != GameAction.Type.MOVE){return;}	
+	private void processMoveEvent(GameEvent action) {
+		if(action.getType() != GameEvent.Type.MOVE){return;}	
 		Player player = null;
 		if(gameFloor.hasPlayer(action.getSenderAddress())){
 			player = gameFloor.getPlayer(action.getSenderAddress());
@@ -146,17 +146,39 @@ public class GameResolver extends Thread{
 		return gameFloor;
 	}
 
-	private boolean senderHasJoinedGame(NetworkAddress senderAddress, Floor floor) {
+	private boolean senderHasJoinedGame(NetworkAddress senderAddress) {
 		//Extract the sender player information from the packet and check if it has already joined the game
-		if(floor.getPlayer(senderAddress)==null){
+		if(gameFloor.getPlayer(senderAddress)==null){
 			return false;
 		}		
 		return true;
 	}
 
+	private boolean senderIsAlive(NetworkAddress senderAddress){
+		Player player = gameFloor.getPlayer(senderAddress);
+		if(player!=null){
+			return  player.isAlive();
+		}
+		return false;
+	}
+	
 	public GameServer getGameServer() {		
 		return gameServer;
 	}	
+	
+	private boolean senderIsAllowed(GameEvent event){
+		
+		NetworkAddress senderAddress = event.getSenderAddress();
+		
+		if(event.isFromServer()){
+			return true;
+		}
+		
+		if (senderIsAlive(senderAddress) && senderHasJoinedGame(senderAddress)){
+			return true;
+		}		
+		return false;
+	}
 	
 	
 }		

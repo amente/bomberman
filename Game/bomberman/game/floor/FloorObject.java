@@ -2,7 +2,11 @@ package bomberman.game.floor;
 
 import bomberman.game.floor.Movable.MovementType;
 
-
+/**
+ * 
+ * FloorObject represents anything that can be placed on the game floor.
+ *
+ */
 public class FloorObject{
 	
 	private String name;
@@ -36,22 +40,6 @@ public class FloorObject{
 		this.x = x;
 		this.y = y;
 	}	
-	
-	public void moveLeft(){		
-		floor.moveObjectTo(this,x-1,y,MovementType.LEFT);
-	}	
-	
-	public void moveRight(){		
-		floor.moveObjectTo(this,x+1,y,MovementType.RIGHT);
-	}	
-	
-	public void moveUp(){		
-		floor.moveObjectTo(this,x,y-1,MovementType.UP);
-	}	
-	
-	public void moveDown(){		
-		floor.moveObjectTo(this,x,y+1,MovementType.DOWN);
-	}
 
 
 	public String getType() {
@@ -67,4 +55,7 @@ public class FloorObject{
 		this.name = name;
 	}
 	
+	public Floor getFloor(){
+		return floor;
+	}
 }	

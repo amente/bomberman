@@ -1,8 +1,7 @@
 package bomberman.game.floor;
 
-import bomberman.game.floor.Floor.Tile;
 
-public class Enemy extends FloorObject implements Movable{
+public class Enemy extends Movable{
 
 	public Enemy(Floor floor) {
 		super(floor, "ENEMY");

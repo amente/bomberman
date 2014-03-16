@@ -40,6 +40,16 @@ import bomberman.game.floor.Movable.MovementType;
  */
 public class GameStateUpdate {
 	
+	public enum UpdateType{	
+		LOAD,
+		NEW,
+		GAME, 
+		DEL,
+		MOVE,
+		EXPLODEBOMB
+	}
+	
+	
 	UpdateType type;
 	private Map<String,String> parameters;
 	
@@ -125,17 +135,7 @@ public class GameStateUpdate {
 	
 	public UpdateType getType(){
 		return type;
-	}
-	
-	public enum UpdateType{	
-		LOAD,
-		NEW,
-		GAME, 
-		DEL,
-		MOVE,
-		EXPLODEBOMB
-	}
-	
+	}	
 	
 	public String toString(){
 		StringBuilder sb = new StringBuilder();		

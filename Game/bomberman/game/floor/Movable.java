@@ -1,9 +1,14 @@
 package bomberman.game.floor;
 
-import bomberman.game.floor.Floor.Tile;
-
-public interface Movable {
+public abstract class Movable extends FloorObject {
 	
+	
+	
+	public Movable(Floor floor, String name) {
+		super(floor, name);
+		// TODO Auto-generated constructor stub
+	}
+
 	public enum MovementType{
 		UP,
 		DOWN,
@@ -23,11 +28,27 @@ public interface Movable {
 		}
 	}
 	/**
-	 * Subclasses implement this to do the logic 
+	 * Subclasses implement this 
 	 * @param o
 	 * @return canAdvance
 	 */	
-	public boolean movedOutOfGrid();
-	public boolean movedToOccupiedGrid(Tile tile, MovementType dir);
+	public abstract boolean movedOutOfGrid();
+	public abstract boolean movedToOccupiedGrid(Tile tile, MovementType dir);
+	
+	public void moveLeft(){		
+		getFloor().moveObjectTo(this,getX()-1,getY(),MovementType.LEFT);
+	}	
+	
+	public void moveRight(){		
+		getFloor().moveObjectTo(this,getX()+1,getY(),MovementType.RIGHT);
+	}	
+	
+	public void moveUp(){		
+		getFloor().moveObjectTo(this,getX(),getY()-1,MovementType.UP);
+	}	
+	
+	public void moveDown(){		
+		getFloor().moveObjectTo(this,getX(),getY()+1,MovementType.DOWN);
+	}
 
 }

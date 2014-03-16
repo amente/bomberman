@@ -3,7 +3,7 @@ package bomberman.game.floor;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import bomberman.game.GameAction;
+import bomberman.game.GameEvent;
 import bomberman.game.GameResolver;
 import bomberman.utils.buffer.Consumer;
 
@@ -34,11 +34,11 @@ public class BombScheduler  extends Thread{
 	
 	public void explosionTimeReached(Bomb bomb) {
 		
-		GameAction action = new GameAction();
-		action.setType(GameAction.Type.EXPLOSION);
+		GameEvent action = new GameEvent();
+		action.setType(GameEvent.Type.EXPLOSION);
 		action.addParameter("BOMB", bomb);	
-		action.setIsFromServer();
-		gameResolver.getGameServer().addAction(action);
+		action.setIsFromServer(true);
+		gameResolver.getGameServer().addEvent(action);
 	}
 	
 	private class Detonator extends TimerTask{
