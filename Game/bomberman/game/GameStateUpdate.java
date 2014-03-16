@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import bomberman.game.floor.Bomb;
+import bomberman.game.floor.Floor;
 import bomberman.game.floor.FloorObject;
 import bomberman.game.floor.Movable.MovementType;
 
@@ -37,6 +38,14 @@ import bomberman.game.floor.Movable.MovementType;
  *  	BOMB {STATUS} X_LOC Y_LOC  
  *  
  *			 STATUS : - {NEW,EXPLODE}
+ *
+ *  Full Update ( A string representation of the game floor):
+ *  	FULL GAMEFLOOR
+ *  
+ *  Player Status Update ( An update consisting of player names and their power ups)
+ *  
+ *      PLAYERSTATUS PLAYER1 POWERUP1 PLAYER2 POWERUP2 ...
+ *
  */
 public class GameStateUpdate {
 	
@@ -46,7 +55,9 @@ public class GameStateUpdate {
 		GAME, 
 		DEL,
 		MOVE,
-		EXPLODEBOMB
+		EXPLODEBOMB,
+		FULL,
+		PLAYERSTATUS,
 	}
 	
 	
@@ -123,6 +134,14 @@ public class GameStateUpdate {
 		return update;		
 	}
 	
+	
+	public static GameStateUpdate makeFullGridUpdateFor(Floor floor){
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.FULL);
+		//TODO: Get the full floor game state (Must be double buffered??? )
+		//update.addParameter("OBJECT_NAME", o.getName());
+		//update.addParameter("OBJECT_TYPE", o.getType()); 				
+		return update;		
+	}
 	
 	
 	public void addParameter(String key,String value){

@@ -5,6 +5,7 @@ public class Bomb extends FloorObject {
 
 	
 	private Player player;	
+	private int explosionRange = 1;
 	
 	public Bomb(Floor floor) {
 		super(floor, "BOMB");	
@@ -22,6 +23,14 @@ public class Bomb extends FloorObject {
 	
 	public Player getPlayer(){
 		return player;
+	}
+
+	public int getExplosionRange() {
+		return explosionRange;
+	}
+
+	public void setExplosionRange(int explosionRange) {
+		this.explosionRange = explosionRange;
 	}
 
 		

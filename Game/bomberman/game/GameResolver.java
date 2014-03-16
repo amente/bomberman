@@ -180,5 +180,10 @@ public class GameResolver extends Thread{
 		return false;
 	}
 	
+	public BombFactory getBombFactory(){
+		return bombFactory;
+		
+	}
+	
 	
 }		

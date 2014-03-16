@@ -6,7 +6,12 @@ import java.util.ArrayList;
 import bomberman.game.network.NetworkAddress;
 import bomberman.game.network.NetworkManager;
 
-
+/**
+ * 
+ * A Test Player
+ *   Can send Join messages, Start messages and a list of game commands using its own socket
+ *
+ */
 public class TestPlayer extends Thread{
 	
 	NetworkManager networkManager;		

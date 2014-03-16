@@ -8,6 +8,11 @@ import java.util.ArrayList;
 
 import bomberman.game.GameStateReciever;
 
+/**
+ * 
+ *Runs an automated test by reading from test set up file
+ *
+ */
 public class TestDriver {
 	
 	

@@ -32,10 +32,19 @@ public class Player extends Movable {
 			System.out.println(getName()+ " moved to space occupied by "+ o.getName());
 			System.out.println(getName()+ "has got a power up!");
 		}else if(o.getType().equalsIgnoreCase("Door")){
-			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);
-			System.out.println(getName()+ " has reached the door!");
-			System.out.println(getName()+ " wins!");
-			System.out.println(" Game Over!");
+			Door d = (Door)o;
+			if(d.isOpen()){
+				gameFloor.MoveAnotherObjectTo(this, d.getX(), d.getY(), dir);
+				System.out.println(getName()+ " has reached the door!");
+				System.out.println(getName()+ " wins!");
+				System.out.println(" Game Over!");
+			}else if(!d.isVisible()){				
+				d.setVisible(true);
+				gameFloor.moveObjectTo(this, d.getX(), d.getY(), dir);
+			}
+		}else if(o.getType().equalsIgnoreCase("Enemy")){
+			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);			
+			gameFloor.addkillPlayerEvent(this);
 		}else{		
 			System.out.println(getName()+ " can not move to space occupied by "+ o.getName());		
 		}		

@@ -18,20 +18,25 @@ import bomberman.gui.GUIBomb;
 import bomberman.gui.GUIObject;
 import bomberman.gui.GUIPlayer;
 
+/**
+ * 
+ * A GUI spectator displays game updates
+ *
+ */
 public class TestSpectator extends BasicGame{
 
 	private TiledMap map;	
 		
-	ArrayBlockingQueue<GameStateUpdate> consumer;
+	ArrayBlockingQueue<GameStateUpdate> gameStateUpdateQueue;
 	private HashMap<String,GUIObject> objects;
-	//private Thread consumerThread;
+	
 	private int updatesCommited = 0;
 	
     public TestSpectator(GameStateReciever reciever)
     {
         super("Bomberman Test Spectator");     
         objects = new HashMap<String,GUIObject>(4); 
-        consumer = reciever.getGameStateUpdates();    
+        gameStateUpdateQueue = reciever.getGameStateUpdates();    
 
     }   
 
@@ -39,8 +44,7 @@ public class TestSpectator extends BasicGame{
 	public void render(GameContainer arg0, Graphics arg1) throws SlickException {
 		// TODO Auto-generated method stub
 		// Render the map
-		map.render(0, 0);
-		
+		map.render(0, 0);	
 		//Render the players
 		for(GUIObject o: objects.values()){
 			o.redraw();
@@ -61,7 +65,7 @@ public class TestSpectator extends BasicGame{
 		
 		GameStateUpdate update = null;
 		try {
-			update = consumer.poll(10, TimeUnit.MILLISECONDS);
+			update = gameStateUpdateQueue.poll(10, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

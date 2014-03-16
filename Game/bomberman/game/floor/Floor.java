@@ -38,6 +38,7 @@ public class Floor {
 	public static final String EMPTYNAME = "_"; // String representation of an empty floor grid
 	
 	private HashMap<NetworkAddress,Player>  players;
+	private ArrayList<Enemy> enemies;
 	private Player hostPlayer;
 	private ArrayList<Tile> emptyTiles = new ArrayList<Tile>() ;
 	private GameResolver gameResolver;
@@ -48,6 +49,7 @@ public class Floor {
 	private TiledMap map;
 	private int xSize;
 	private int ySize;
+		
 	
 	Random rand = new Random();
 	
@@ -60,10 +62,11 @@ public class Floor {
 	}	
 	
 	private void initialize(){
+		enemies = new ArrayList<Enemy>();
 		loadStateFromTmxFile("Resources/bomberman_floor_1.tmx");
 		xSize = tiles[0].length;
 		ySize = tiles.length;
-		players = new HashMap<NetworkAddress,Player>();
+		players = new HashMap<NetworkAddress,Player>();		
 	}
 	
 	public boolean moveObjectTo(FloorObject o,int x,int y,MovementType dir)
@@ -191,9 +194,8 @@ public class Floor {
 		gameResolver.getGameServer().addEvent(event);
 	}
 
-	public void givePowerUp(Player player) {
-		// TODO Auto-generated method stub
-		
+	public void givePowerUp(Player player) {	
+		gameResolver.getBombFactory().increaseLimit(player);		
 	}	
 
 	public void killPlayer(Player p) {
@@ -201,7 +203,6 @@ public class Floor {
 		System.out.println(p.getName()+ "died!");	
 		 p.setIsAlive(false);
 		  addUpdate(GameStateUpdate.makeUpdateForRemoveObject(p));		
-		//players.remove(p.getAddress());
 	}
 	
 	public String createUniquePlayerID(){		
@@ -228,13 +229,65 @@ public class Floor {
 	
 	public void explodeBomb(Bomb bomb){		
 		System.out.println("Bomb Exploded"+" x:"+bomb.getX()+" y:"+bomb.getY());
-		addUpdate(GameStateUpdate.makeUpdateForExplodeBomb(bomb));		
+		
+		addUpdate(GameStateUpdate.makeUpdateForExplodeBomb(bomb));	
+		
+		int range = bomb.getExplosionRange();
+		
+		// Kill all at right
+		for(int i=0;i<range;i++){
+			if(bomb.getX()+i< tiles[0].length){
+				FloorObject o = tiles[bomb.getX()+i][bomb.getY()].getObject();
+				if(o!=null){
+					tiles[o.getX()][o.getY()].removeObject();
+					addUpdate(GameStateUpdate.makeUpdateForRemoveObject(o));
+				}
+			}			
+		}
+		
+		//Kill all at left
+		for(int i=0;i<range;i++){
+			if(bomb.getX()-i > 0){
+				FloorObject o = tiles[bomb.getX()-i][bomb.getY()].getObject();
+				if(o!=null){
+					tiles[o.getX()][o.getY()].removeObject();
+					addUpdate(GameStateUpdate.makeUpdateForRemoveObject(o));
+				}
+			}			
+		}
+		
+		//Kill all up
+		for(int i=0;i<range;i++){
+			if(bomb.getY()-i > 0){
+				FloorObject o = tiles[bomb.getX()][bomb.getY()-i].getObject();
+				if(o!=null){
+					tiles[o.getX()][o.getY()].removeObject();
+					addUpdate(GameStateUpdate.makeUpdateForRemoveObject(o));
+				}
+			}			
+		}
+		
+		// Kill all down
+		for (int i = 0; i < range; i++) {
+			if (bomb.getY() + i > 0) {
+				FloorObject o = tiles[bomb.getX()][bomb.getY() + i].getObject();
+				if (o != null) {
+					tiles[o.getX()][o.getY()].removeObject();
+					addUpdate(GameStateUpdate.makeUpdateForRemoveObject(o));
+				}
+			}
+		}		
+			
 	}	
 		
 	public ArrayBlockingQueue<GameStateUpdate> getGameStateUpdateQueue(){
 		return gameStateUpdateQueue;
 	}
 	
+	
+	public int getEnemyCount(){
+		return enemies.size();
+	}
 	
 	/**
 	 * Loads the initial state of the floor from a map(.tmx) file
@@ -292,7 +345,9 @@ public class Floor {
  				} else if(value.equalsIgnoreCase("wall")){
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Wall(this));					
  				}else if(value.equalsIgnoreCase("enemy")){
- 					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Enemy(this));					
+ 					Enemy enemy = new Enemy(this);
+ 					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,enemy);
+ 					enemies.add(enemy);
  				}else if(value.equalsIgnoreCase("empty")){
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,null);
  					emptyTiles.add(tiles[xAxis][yAxis]);					
@@ -308,10 +363,12 @@ public class Floor {
 	 * @return
 	 */
 	public String getState(){
+		
 		StringBuilder state = new StringBuilder();
 		for (Tile[] yGrid : tiles){
 			for(Tile l: yGrid){
 				state.append(l.getObject()==null?EMPTYNAME:l.getObject().getName());
+				state.append("|");
 			}
 			state.append("\n");
 		}

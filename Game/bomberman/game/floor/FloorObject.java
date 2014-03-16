@@ -1,6 +1,5 @@
 package bomberman.game.floor;
 
-import bomberman.game.floor.Movable.MovementType;
 
 /**
  * 

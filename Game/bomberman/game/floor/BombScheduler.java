@@ -2,19 +2,19 @@ package bomberman.game.floor;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import bomberman.game.GameEvent;
 import bomberman.game.GameResolver;
-import bomberman.utils.buffer.Consumer;
 
 public class BombScheduler  extends Thread{
 	
-	private Consumer<Bomb> consumer;
+	private ArrayBlockingQueue<Bomb> bombQueue;
 	private GameResolver gameResolver;
 	
 	
 	public BombScheduler(BombFactory bombFactory, GameResolver gameResolver){		
-		consumer = new Consumer<Bomb>( bombFactory.getBombQueue());
+		bombQueue = bombFactory.getBombQueue();
 		
 		this.gameResolver = gameResolver; 
 	}	
@@ -27,7 +27,7 @@ public class BombScheduler  extends Thread{
 	@Override
 	public void run(){
 		while(gameResolver.getGameServer().isRunning()){
-			Bomb bomb  =  consumer.consume();
+			Bomb bomb  =  bombQueue.poll();
 			attachTimer(bomb);			
 		}	
 	}
