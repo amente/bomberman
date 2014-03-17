@@ -38,6 +38,7 @@ public class JoinResolver implements PacketProcessor {
 				}else if(param.equalsIgnoreCase("START")){					
 					if(gameFloor.getHostPlayer().getAddress().equals(action.getSenderAddress())){
 						gameServer.setGameStarted(true);
+						gameResolver.setGameIsRunning(true);
 						gameServer.broadCastStartGame(gameFloor.getAddressOfAllPlayers());
 					}					
 				}				

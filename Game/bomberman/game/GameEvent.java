@@ -18,7 +18,7 @@ public class GameEvent {
 	private Type type;
 	private HashMap<String,Object> parameters;	
 	private NetworkAddress senderAddress = null;
-	private boolean isFromServer = false;
+	private boolean isFromPlayer = true;
 	
 	public GameEvent(){
 		parameters = new HashMap<String,Object>(3);	
@@ -59,10 +59,10 @@ public class GameEvent {
 		this.senderAddress  = networkAddress;		
 	}
 
-	public void setIsFromServer(boolean b){
-		isFromServer = b;
+	public void setIsFromPlayer(boolean b){
+		isFromPlayer = b;
 	}
-	public boolean isFromServer() {		
-		return isFromServer ;
+	public boolean isFromPlayer() {		
+		return isFromPlayer ;
 	}
 }

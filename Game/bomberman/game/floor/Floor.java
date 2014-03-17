@@ -190,7 +190,7 @@ public class Floor {
 		GameEvent event = new GameEvent();
 		event.setType(GameEvent.Type.KILL);
 		event.addParameter("PLAYER",p);	
-		event.setIsFromServer(true);
+		event.setIsFromPlayer(false);
 		gameResolver.getGameServer().addEvent(event);
 	}
 
