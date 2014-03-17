@@ -270,44 +270,48 @@ public class Floor {
 		int range = bomb.getExplosionRange();
 		
 		// Kill all at right
-		for(int i=0;i<range;i++){
+		for(int i=0;i<=range;i++){
 			if(bomb.getX()+i< tiles[0].length){
 				FloorObject o = tiles[bomb.getX()+i][bomb.getY()].getObject();
 				if(o!=null){
 					tiles[o.getX()][o.getY()].removeObject();
+					if (o instanceof Player) { ((Player)o).setIsAlive(false); }
 					addUpdate(GameStateUpdate.makeUpdateForRemoveObject(o));
 				}
 			}			
 		}
 		
 		//Kill all at left
-		for(int i=0;i<range;i++){
+		for(int i=0;i<=range;i++){
 			if(bomb.getX()-i > 0){
 				FloorObject o = tiles[bomb.getX()-i][bomb.getY()].getObject();
 				if(o!=null){
 					tiles[o.getX()][o.getY()].removeObject();
+					if (o instanceof Player) { ((Player)o).setIsAlive(false); }
 					addUpdate(GameStateUpdate.makeUpdateForRemoveObject(o));
 				}
 			}			
 		}
 		
 		//Kill all up
-		for(int i=0;i<range;i++){
+		for(int i=0;i<=range;i++){
 			if(bomb.getY()-i > 0){
 				FloorObject o = tiles[bomb.getX()][bomb.getY()-i].getObject();
 				if(o!=null){
 					tiles[o.getX()][o.getY()].removeObject();
+					if (o instanceof Player) { ((Player)o).setIsAlive(false); }
 					addUpdate(GameStateUpdate.makeUpdateForRemoveObject(o));
 				}
 			}			
 		}
 		
 		// Kill all down
-		for (int i = 0; i < range; i++) {
+		for (int i = 0; i <= range; i++) {
 			if (bomb.getY() + i > 0) {
 				FloorObject o = tiles[bomb.getX()][bomb.getY() + i].getObject();
 				if (o != null) {
 					tiles[o.getX()][o.getY()].removeObject();
+					if (o instanceof Player) { ((Player)o).setIsAlive(false); }
 					addUpdate(GameStateUpdate.makeUpdateForRemoveObject(o));
 				}
 			}

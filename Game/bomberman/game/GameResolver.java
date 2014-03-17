@@ -48,10 +48,7 @@ public class GameResolver extends Thread{
 		}		
 	}	
 	
-	/**
-	 * Remove messages from the server queue and process them
-	 */
-	private void processEvents(){		
+	private void processEvents() {
 		GameEvent event = null;
 		/*try {
 			event = gameEventQueue.poll(10, TimeUnit.MILLISECONDS);
@@ -63,6 +60,14 @@ public class GameResolver extends Thread{
 		event = gameEventQueue.poll();
 		if(event == null){return;}
 		
+		processEvent(event);
+	}
+	
+	/**
+	 * Remove messages from the server queue and process them
+	 */
+	public void processEvent( GameEvent event ){	
+		System.out.println(event);
 		if (!senderIsAllowed(event)) {
 			return;
 		}		

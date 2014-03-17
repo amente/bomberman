@@ -22,6 +22,7 @@ public class TestResolverFactory {
 		if (server == null) { fail(); }
 		
 		GameResolver resolver = new GameResolver(server, true);
+		resolver.setGameIsRunning(true);
 		resolver.start();
 		
 		return resolver;
