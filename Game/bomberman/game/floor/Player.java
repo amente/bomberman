@@ -1,14 +1,14 @@
 package bomberman.game.floor;
 
-import bomberman.game.floor.Floor.Tile;
 import bomberman.game.network.NetworkAddress;
 
 
-public class Player extends FloorObject implements Movable {
+public class Player extends Movable {
 
 	private boolean isHost;
 	private NetworkAddress addr;
 	private Floor gameFloor;
+	private boolean isAlive = true;
 	
 	public Player(Floor floor, String name) {
 		super(floor, name);
@@ -21,16 +21,30 @@ public class Player extends FloorObject implements Movable {
 	public boolean movedToOccupiedGrid(Tile loc,MovementType dir) {
 		
 		FloorObject o = loc.getObject();		
-		if(o.getType().equalsIgnoreCase("Player")){
-			gameFloor.MoveAnotherObjectTo((Player)o, o.getX(), o.getY(), dir);
-			gameFloor.addkillPlayerAction((Player)o);
-			gameFloor.addkillPlayerAction(this);	
+		if(o.getType().equalsIgnoreCase("Player")){			
+			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);	
+			gameFloor.addkillPlayerEvent((Player)o);
+			gameFloor.addkillPlayerEvent(this);
 			System.out.println(getName()+ " moved to space occupied by "+ o.getName());			
 		}else if(o.getType().equalsIgnoreCase("PowerUp")){
-			gameFloor.moveObjectTo(o, o.getX(), o.getY(), dir);
+			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);
 			gameFloor.givePowerUp(this);
 			System.out.println(getName()+ " moved to space occupied by "+ o.getName());
 			System.out.println(getName()+ "has got a power up!");
+		}else if(o.getType().equalsIgnoreCase("Door")){
+			Door d = (Door)o;
+			if(d.isOpen()){
+				gameFloor.MoveAnotherObjectTo(this, d.getX(), d.getY(), dir);
+				System.out.println(getName()+ " has reached the door!");
+				System.out.println(getName()+ " wins!");
+				System.out.println(" Game Over!");
+			}else if(!d.isVisible()){				
+				d.setVisible(true);
+				gameFloor.moveObjectTo(this, d.getX(), d.getY(), dir);
+			}
+		}else if(o.getType().equalsIgnoreCase("Enemy")){
+			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);			
+			gameFloor.addkillPlayerEvent(this);
 		}else{		
 			System.out.println(getName()+ " can not move to space occupied by "+ o.getName());		
 		}		
@@ -63,4 +77,11 @@ public class Player extends FloorObject implements Movable {
 		return false;
 	}
 	
+	public void setIsAlive(boolean b){
+		isAlive = b;
+	}
+	
+	public boolean isAlive(){
+		return isAlive;
+	}
 }

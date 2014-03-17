@@ -37,7 +37,7 @@ public class GameProtocol {
 		return theProtocol;
 	}	
 	
-	public GameAction getAction(DatagramPacket packet) {
+	public GameEvent getEvent(DatagramPacket packet){	
 		String message = new String(packet.getData(),packet.getOffset(),packet.getLength());
 		NetworkAddress senderAddress = new NetworkAddress(packet.getSocketAddress());
 		GameAction action = getAction(message);
@@ -52,19 +52,21 @@ public class GameProtocol {
 		String[] params = message.split(" ", 2);
 		if(params.length < 1) { return null;}
 		
-		GameAction action = null;
+		GameEvent event = null;
 
 		// For game messages we don't need to check for player
 
 		if (params[0].equalsIgnoreCase("Game")) {
 			if (params[1].equalsIgnoreCase("JOIN")) {
-				action = new GameAction();
-				action.setType(GameAction.Type.GAME);
-				action.addParameter("CALL", "JOIN");
+				event = new GameEvent();
+				event.setType(GameEvent.Type.GAMECHANGE);
+				event.addParameter("CALL", "JOIN");
+				event.setSenderAddress(senderAddress);
 			} else if (params[1].equalsIgnoreCase("START")) {
-				action = new GameAction();
-				action.setType(GameAction.Type.GAME);
-				action.addParameter("CALL", "START");
+				event = new GameEvent();
+				event.setType(GameEvent.Type.GAMECHANGE);
+				event.addParameter("CALL", "START");
+				event.setSenderAddress(senderAddress);
 			}
 		}
 
@@ -75,17 +77,21 @@ public class GameProtocol {
 			if (params.length != 2) {
 				return null;
 			}
-			action = new GameAction();
-			action.setType(GameAction.Type.MOVE);
-			action.addParameter("DIR", params[1]);
+			event = new GameEvent();
+			event.setType(GameEvent.Type.MOVE);
+			event.addParameter("DIR", params[1]);
 
 		} else if (params[0].equalsIgnoreCase("BOMB")) {
-			action = new GameAction();
-			action.setType(GameAction.Type.BOMB);
+			event = new GameEvent();
+			event.setType(GameEvent.Type.BOMB);
 
 		}
 
-		return action;
+		// Bind action to sender address
+		event.setSenderAddress(senderAddress);
+		return event;
+		
+		
 	}
 
 

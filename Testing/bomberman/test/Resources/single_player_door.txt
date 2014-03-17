@@ -1,3 +1,5 @@
+1
+START
 Move Down
 Move Down
 Move Down
@@ -5,38 +7,23 @@ Move Down
 Move Down
 Move Down
 Move Down
+Move Right
+Move Right
+Move Right
+Move Right
+Move Right
+Move Right
+Move Right
+Move Right
+Move Right
 Move Right
 Move Right
 Move Right
 Move Up
 Move Up
 Move Up
-Move Up
-Move Right
-Move Right
-Move Right
-Move Right
+Move Left
+Move Left
+Move Left
 Move Down
-Move Right
-Move Up
-Move Up
-Move Up
-Move Up
-Move Left
-Move Left
-Move Left
-Move Left
-Move Left
-Move Left
-Move Left
-Move Left
-Move Left
-Move Left
-Move Left
-Move Left
-Move Right
-Move Right
-Move Right
-Move Right
-Move Down
-Move Right
+END

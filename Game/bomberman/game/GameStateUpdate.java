@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import bomberman.game.floor.Bomb;
+import bomberman.game.floor.Floor;
 import bomberman.game.floor.FloorObject;
 import bomberman.game.floor.Movable.MovementType;
 
@@ -37,8 +38,28 @@ import bomberman.game.floor.Movable.MovementType;
  *  	BOMB {STATUS} X_LOC Y_LOC  
  *  
  *			 STATUS : - {NEW,EXPLODE}
+ *
+ *  Full Update ( A string representation of the game floor):
+ *  	FULL GAMEFLOOR
+ *  
+ *  Player Status Update ( An update consisting of player names and their power ups)
+ *  
+ *      PLAYERSTATUS PLAYER1 POWERUP1 PLAYER2 POWERUP2 ...
+ *
  */
 public class GameStateUpdate {
+	
+	public enum UpdateType{	
+		LOAD,
+		NEW,
+		GAME, 
+		DEL,
+		MOVE,
+		EXPLODEBOMB,
+		FULL,
+		PLAYERSTATUS,
+	}
+	
 	
 	UpdateType type;
 	private Map<String,String> parameters;
@@ -65,9 +86,9 @@ public class GameStateUpdate {
 			parameters.put("OBJECT_NAME",tokens[2]);
 			parameters.put("X_LOC",tokens[3]);
 			parameters.put("Y_LOC",tokens[4]);
-		}else if(stype.equalsIgnoreCase(UpdateType.BOMB.name())){
-			type = UpdateType.BOMB;
-			parameters.put("STATUS", tokens[1]);			
+		}else if(stype.equalsIgnoreCase(UpdateType.EXPLODEBOMB.name())){
+			type = UpdateType.EXPLODEBOMB;	
+			parameters.put("OBJECT_NAME",tokens[1]);
 			parameters.put("X_LOC",tokens[2]);
 			parameters.put("Y_LOC",tokens[3]);
 		}else if(stype.equalsIgnoreCase(UpdateType.DEL.name())){
@@ -99,8 +120,8 @@ public class GameStateUpdate {
 	
 		
 	public static GameStateUpdate makeUpdateForExplodeBomb(Bomb b){
-		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.BOMB);		
-		update.addParameter("STATUS", "EXPLODE");
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.EXPLODEBOMB);
+		update.addParameter("OBJECT_NAME", b.getName());
 		update.addParameter("X_LOC", ""+b.getX());
 		update.addParameter("Y_LOC", ""+b.getY());
 		return update;		
@@ -114,6 +135,14 @@ public class GameStateUpdate {
 	}
 	
 	
+	public static GameStateUpdate makeFullGridUpdateFor(Floor floor){
+		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.FULL);
+		//TODO: Get the full floor game state (Must be double buffered??? )
+		//update.addParameter("OBJECT_NAME", o.getName());
+		//update.addParameter("OBJECT_TYPE", o.getType()); 				
+		return update;		
+	}
+	
 	
 	public void addParameter(String key,String value){
 		parameters.put(key, value);
@@ -125,17 +154,7 @@ public class GameStateUpdate {
 	
 	public UpdateType getType(){
 		return type;
-	}
-	
-	public enum UpdateType{	
-		LOAD,
-		NEW,
-		GAME, 
-		DEL,
-		MOVE,
-		BOMB
-	}
-	
+	}	
 	
 	public String toString(){
 		StringBuilder sb = new StringBuilder();		

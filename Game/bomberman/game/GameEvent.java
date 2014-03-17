@@ -4,12 +4,12 @@ import java.util.HashMap;
 
 import bomberman.game.network.NetworkAddress;
 
-public class GameAction {
+public class GameEvent {
 	
 	public enum Type{		
 		MOVE,
 		BOMB, 
-		GAME,
+		GAMECHANGE,
 		EXPLOSION,
 		KILL,
 	}
@@ -20,7 +20,7 @@ public class GameAction {
 	private NetworkAddress senderAddress = null;
 	private boolean isFromServer = false;
 	
-	public GameAction(){
+	public GameEvent(){
 		parameters = new HashMap<String,Object>(3);	
 	}	
 	
@@ -32,11 +32,11 @@ public class GameAction {
 		return parameters.get(key);
 	}
 	
-	public GameAction.Type getType(){
+	public GameEvent.Type getType(){
 		return type;
 	}
 	
-	public void setType(GameAction.Type type){
+	public void setType(GameEvent.Type type){
 		this.type = type; 
 	}
 
@@ -59,8 +59,8 @@ public class GameAction {
 		this.senderAddress  = networkAddress;		
 	}
 
-	public void setIsFromServer(){
-		isFromServer = true;
+	public void setIsFromServer(boolean b){
+		isFromServer = b;
 	}
 	public boolean isFromServer() {		
 		return isFromServer ;

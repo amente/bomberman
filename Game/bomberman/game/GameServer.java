@@ -2,12 +2,11 @@ package bomberman.game;
 
 import java.net.DatagramPacket;
 import java.net.SocketException;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import bomberman.game.network.NetworkAddress;
 import bomberman.game.network.NetworkManager;
-import bomberman.utils.buffer.IBuffer;
-import bomberman.utils.buffer.Producer;
-import bomberman.utils.buffer.SingleBuffer;
 
 
 public class GameServer extends Thread {
@@ -17,18 +16,15 @@ public class GameServer extends Thread {
 	private boolean gameFinished = false;
 	private boolean gameStarted = false;
 		
-	private IBuffer<GameAction> messageBuffer; // Thread safe FIFO Queue
-	private Producer<GameAction> producer;
-	
-		
+	private ArrayBlockingQueue<GameEvent> gameEventQueue; // Thread safe FIFO Queue
+			
 	public GameServer(int port) throws SocketException{
 		super("GameServer");
 		
 		networkManager = new NetworkManager(port);
 		
-		messageBuffer = new SingleBuffer<GameAction>(Application.QUEUE_CAPACITY);	
-		producer = new Producer<GameAction>(messageBuffer);
-		
+		gameEventQueue = new ArrayBlockingQueue<GameEvent>(Application.QUEUE_CAPACITY,true);	
+				
 	}	
 	
 	public void listenForJoin(JoinResolver r){
@@ -39,12 +35,13 @@ public class GameServer extends Thread {
 	}
 		
 	public boolean listenForGameCommands(){		
-		DatagramPacket packet = networkManager.receiveAsynchronous(0,true);		
-		
-		GameAction action = GameProtocol.getInstance().getAction(packet);		
-		
-		producer.produce(action);			
-		return true;
+		DatagramPacket packet = networkManager.receiveAsynchronous(50,true);		
+		if(packet!=null){
+			GameEvent event = GameProtocol.getInstance().getEvent(packet);			
+			addEvent(event);
+			return true;
+		}
+		return false;
 	}
 		
 	public boolean isRunning(){
@@ -64,8 +61,8 @@ public class GameServer extends Thread {
 		networkManager.close();
 	}
 	
-	public IBuffer<GameAction> getMessageBuffer(){
-		return messageBuffer;
+	public ArrayBlockingQueue<GameEvent> getMessageBuffer(){
+		return gameEventQueue;
 	}
 		
 	public void setGameFinished(boolean gameFinished){
@@ -76,16 +73,21 @@ public class GameServer extends Thread {
 		this.gameStarted = gameStarted;
 	}
 			
-	public void broadCastStartGame(NetworkAddress[] allPlayers) {
+	public void broadCastStartGame(Set<NetworkAddress> allPlayers) {
 				
 	}
 	
-	public void broadCastEndGame(NetworkAddress[] allPlayers) {
+	public void broadCastEndGame(Set<NetworkAddress> allPlayers) {
 				
 	}
 
-	public synchronized void addAction(GameAction action) {
-		producer.produce(action);
+	public void addEvent(GameEvent event) {
+		try {
+			gameEventQueue.put(event);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		};
 	}
 	
 	public NetworkManager getNetworkManager(){

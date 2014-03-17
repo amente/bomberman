@@ -30,7 +30,7 @@ public class GameActionTest {
 	}
 
 	/**
-	 * Test method for {@link bomberman.game.GameAction#GameAction()}.
+	 * Test method for {@link bomberman.game.GameEvent#GameAction()}.
 	 */
 	@Test
 	public void testGameAction() {
@@ -38,7 +38,7 @@ public class GameActionTest {
 	}
 
 	/**
-	 * Test method for {@link bomberman.game.GameAction#addParameter(java.lang.String, java.lang.String)}.
+	 * Test method for {@link bomberman.game.GameEvent#addParameter(java.lang.String, java.lang.String)}.
 	 */
 	@Test
 	public void testAddParameter() {
@@ -46,7 +46,7 @@ public class GameActionTest {
 	}
 
 	/**
-	 * Test method for {@link bomberman.game.GameAction#getParameter(java.lang.String)}.
+	 * Test method for {@link bomberman.game.GameEvent#getParameter(java.lang.String)}.
 	 */
 	@Test
 	public void testGetParameter() {
@@ -54,7 +54,7 @@ public class GameActionTest {
 	}
 
 	/**
-	 * Test method for {@link bomberman.game.GameAction#getType()}.
+	 * Test method for {@link bomberman.game.GameEvent#getType()}.
 	 */
 	@Test
 	public void testGetType() {
@@ -62,7 +62,7 @@ public class GameActionTest {
 	}
 
 	/**
-	 * Test method for {@link bomberman.game.GameAction#setType(bomberman.game.GameAction.Type)}.
+	 * Test method for {@link bomberman.game.GameEvent#setType(bomberman.game.GameEvent.Type)}.
 	 */
 	@Test
 	public void testSetType() {
@@ -70,7 +70,7 @@ public class GameActionTest {
 	}
 
 	/**
-	 * Test method for {@link bomberman.game.GameAction#getSenderAddress()}.
+	 * Test method for {@link bomberman.game.GameEvent#getSenderAddress()}.
 	 */
 	@Test
 	public void testGetSenderAddress() {
@@ -78,7 +78,7 @@ public class GameActionTest {
 	}
 
 	/**
-	 * Test method for {@link bomberman.game.GameAction#setSenderAddress(bomberman.game.network.NetworkAddress)}.
+	 * Test method for {@link bomberman.game.GameEvent#setSenderAddress(bomberman.game.network.NetworkAddress)}.
 	 */
 	@Test
 	public void testSetSenderAddress() {

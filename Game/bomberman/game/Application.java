@@ -5,7 +5,7 @@ import java.net.SocketException;
 
 public class Application {
 	
-	public static final int QUEUE_CAPACITY = 10;
+	public static final int QUEUE_CAPACITY = 50;
 	public static final int MAX_DTATAGRAM_SIZE = 1024; // In Bytes
 	
 	static boolean gameRunning = false;
