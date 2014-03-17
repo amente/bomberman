@@ -67,7 +67,7 @@ public class EnemyCommander extends Thread{
 			
 			event.addParameter("DIR",dir);
 			event.setIsFromPlayer(false);
-			gameResolver.getGameServer().addEvent(event);			
+			gameResolver.addEvent(event);			
 			
 		}		
 		

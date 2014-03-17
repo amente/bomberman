@@ -95,7 +95,13 @@ public class GameStateUpdate {
 			type = UpdateType.DEL;
 			parameters.put("OBJECT_NAME", tokens[1]);			
 			parameters.put("OBJECT_TYPE",tokens[2]);		
-		}					
+		}else if(stype.equalsIgnoreCase(UpdateType.FULL.name())){
+			type = UpdateType.FULL;
+			parameters.put("STATE",tokens[1]);
+			parameters.put("X_SIZE",tokens[2]);
+			parameters.put("Y_SIZE",tokens[3]);
+		
+		}
 		
 	}
 	
@@ -135,11 +141,14 @@ public class GameStateUpdate {
 	}
 	
 	
-	public static GameStateUpdate makeFullGridUpdateFor(Floor floor){
+	public static GameStateUpdate makeFullUpdateFor(Floor floor){
 		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.FULL);
 		//TODO: Get the full floor game state (Must be double buffered??? )
 		//update.addParameter("OBJECT_NAME", o.getName());
-		//update.addParameter("OBJECT_TYPE", o.getType()); 				
+		//update.addParameter("OBJECT_TYPE", o.getType());
+		update.addParameter("X_SIZE",""+floor.getXSize());
+		update.addParameter("Y_SIZE",""+floor.getYSize());
+		update.addParameter("STATE",""+floor.getState());
 		return update;		
 	}
 	

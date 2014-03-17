@@ -1,9 +1,6 @@
 package bomberman.test;
 import static org.junit.Assert.fail;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,7 +8,6 @@ import bomberman.game.GameEvent;
 import bomberman.game.GameProtocol;
 import bomberman.game.GameResolver;
 import bomberman.game.floor.Player;
-import bomberman.game.network.NetworkAddress;
 
 public class MovementTests {
 	@Test public void MoveUp_FreeToMove() { RunSingleMoveTest( "Move UP", 2, 2, 2, 1 ); }
@@ -30,7 +26,7 @@ public class MovementTests {
 			int expectedX,
 			int expectedY
 	) {
-		GameResolver resolver = new GameResolver(null, true);
+		GameResolver resolver = new GameResolver();
 		
 		Player player = TestPlayerFactory.createPlayer(resolver, initialX, initialY);
 		if (expectedX == -1) { expectedX = player.getX(); expectedY = player.getY(); }
@@ -51,8 +47,8 @@ public class MovementTests {
 		IGameStateAssertion postAssertion = new IGameStateAssertion() {
 			@Override
 			public void AssertState(GameResolver r) {
-				Player p1 = r.getGameFloor().getPlayer("Player1");
-				Player p2 = r.getGameFloor().getPlayer("Player2");
+				Player p1 = r.getPlayer("Player1");
+				Player p2 = r.getPlayer("Player2");
 				Assert.assertEquals(p1.getX(), 2);
 				Assert.assertEquals(p1.getY(), 3);
 				
@@ -78,8 +74,8 @@ public class MovementTests {
 		IGameStateAssertion postAssertion = new IGameStateAssertion() {
 			@Override
 			public void AssertState(GameResolver r) {
-				Player p1 = r.getGameFloor().getPlayer("Player1");
-				Player p2 = r.getGameFloor().getPlayer("Player2");
+				Player p1 = r.getPlayer("Player1");
+				Player p2 = r.getPlayer("Player2");
 				Assert.assertFalse(p1.isAlive());
 				Assert.assertFalse(p2.isAlive());
 			}

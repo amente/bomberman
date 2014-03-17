@@ -11,7 +11,6 @@ import java.util.List;
 import bomberman.game.GameEvent;
 import bomberman.game.GameProtocol;
 import bomberman.game.GameResolver;
-import bomberman.game.GameServer;
 import bomberman.game.floor.Player;
 
 public class ThreadedTestRunner {
@@ -88,7 +87,7 @@ public class ThreadedTestRunner {
 		try { Thread.sleep(expectedTestTime); } catch (InterruptedException e) {}
 
 		TestPlayerFactory.playerNum = 1;
-		resolver.getGameServer().stopGracefully();
+		resolver.setGameIsRunning(false);		
 		postAssertion.AssertState(resolver);
 		
 		try { Thread.sleep(100); } catch (InterruptedException e) {}
@@ -101,18 +100,17 @@ public class ThreadedTestRunner {
 		return action;
 	}
 
-	public static void RunGameTest(List<GameEvent> events, GameResolver resolver) {
+	public static void RunGameTest(List<GameEvent> events, final GameResolver resolver) {
 		Thread[] threads = new Thread[events.size()];
 		
-		final GameServer server = resolver.getGameServer();
-		
+				
 		int counter = 0;
 		
 		for(final GameEvent event : events) {
 			Runnable r = new Runnable() {
 				@Override
 				public void run() {
-					server.addEvent(event);
+					resolver.addEvent(event);
 				}
 			};
 			

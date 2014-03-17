@@ -26,7 +26,7 @@ public class BombScheduler  extends Thread{
 	
 	@Override
 	public void run(){
-		while(gameResolver.getGameServer().isRunning()){
+		while(gameResolver.gameIsRunning()){
 			Bomb bomb  =  bombQueue.poll();
 			if(bomb!=null){
 				attachTimer(bomb);
@@ -40,7 +40,7 @@ public class BombScheduler  extends Thread{
 		action.setType(GameEvent.Type.EXPLOSION);
 		action.addParameter("BOMB", bomb);	
 		action.setIsFromPlayer(false);
-		gameResolver.getGameServer().addEvent(action);
+		gameResolver.addEvent(action);
 	}
 	
 	private class Detonator extends TimerTask{
