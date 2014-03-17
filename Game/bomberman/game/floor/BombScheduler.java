@@ -28,7 +28,9 @@ public class BombScheduler  extends Thread{
 	public void run(){
 		while(gameResolver.getGameServer().isRunning()){
 			Bomb bomb  =  bombQueue.poll();
-			attachTimer(bomb);			
+			if(bomb!=null){
+				attachTimer(bomb);
+			}
 		}	
 	}
 	
@@ -37,7 +39,7 @@ public class BombScheduler  extends Thread{
 		GameEvent action = new GameEvent();
 		action.setType(GameEvent.Type.EXPLOSION);
 		action.addParameter("BOMB", bomb);	
-		action.setIsFromServer(true);
+		action.setIsFromPlayer(false);
 		gameResolver.getGameServer().addEvent(action);
 	}
 	

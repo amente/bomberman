@@ -26,4 +26,5 @@ Move Left
 Move Left
 Move Left
 Move Down
+Move Down
 END

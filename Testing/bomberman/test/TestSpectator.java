@@ -29,15 +29,18 @@ public class TestSpectator extends BasicGame{
 		
 	ArrayBlockingQueue<GameStateUpdate> gameStateUpdateQueue;
 	private HashMap<String,GUIObject> objects;
+	GameStateReciever reciver;
+	TestPlayer player;
 	
 	private int updatesCommited = 0;
 	
-    public TestSpectator(GameStateReciever reciever)
+    public TestSpectator(TestPlayer player)
     {
         super("Bomberman Test Spectator");     
         objects = new HashMap<String,GUIObject>(4); 
-        gameStateUpdateQueue = reciever.getGameStateUpdates();    
-
+        gameStateUpdateQueue = new ArrayBlockingQueue<GameStateUpdate>(500,true);  
+        this.player = player;
+        reciver = new GameStateReciever(gameStateUpdateQueue,player.getNetworkManager());
     }   
 
 	@Override
@@ -170,30 +173,50 @@ public class TestSpectator extends BasicGame{
 	}
 	
 	
-	 public static void startGUIThread(final BasicGame game){
-			
-			Thread guiThread = new Thread(new Runnable(){
+	public Thread start() {
+		
+		final TestSpectator game = this;
+		Thread guiThread = new Thread(new Runnable(){
 
-				@Override
-				public void run() {
-					
-					 AppGameContainer app1;
-						try {
-							app1 = new AppGameContainer(game);
-							app1.setShowFPS(false);
-					        app1.setDisplayMode(960, 780, false);            
-					        app1.start();
-						} catch (SlickException e2) {
-							// TODO Auto-generated catch block
-							e2.printStackTrace();
-					}  
-					
+			@Override
+			public void run() {
+				// Start the app container
+				AppGameContainer app1;
+				try {
+					app1 = new AppGameContainer(game);
+					app1.setShowFPS(false);
+					app1.setDisplayMode(960, 780, false);
+					app1.start();
+				} catch (SlickException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
 				}
 				
-			});
+								
+				while(!game.closeRequested()){
+					//Wait
+				}
+				System.out.print("Finished!");
+				game.finish();
+			}
 			
-			guiThread.start();
 			
-		}
+		},"GUI Wrapper");
+		
+		
+		guiThread.start();
+		// Start the receiver
+		reciver.start();
+		
+		return guiThread;
+
+	}
+
+	protected void finish() {
+		reciver.interrupt();
+		player.interrupt();
+				
+	}
+	 
 
 }

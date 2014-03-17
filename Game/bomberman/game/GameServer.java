@@ -34,14 +34,14 @@ public class GameServer extends Thread {
 		}
 	}
 		
-	public boolean listenForGameCommands(){		
+	public void listenForGameCommands(){		
 		DatagramPacket packet = networkManager.receiveAsynchronous(50,true);		
 		if(packet!=null){
-			GameEvent event = GameProtocol.getInstance().getEvent(packet);			
-			addEvent(event);
-			return true;
-		}
-		return false;
+			GameEvent event = GameProtocol.getInstance().getEvent(packet);	
+			if(event!=null){
+				addEvent(event);
+			}			
+		}		
 	}
 		
 	public boolean isRunning(){
@@ -61,7 +61,7 @@ public class GameServer extends Thread {
 		networkManager.close();
 	}
 	
-	public ArrayBlockingQueue<GameEvent> getMessageBuffer(){
+	public ArrayBlockingQueue<GameEvent> getGameEventQueue(){
 		return gameEventQueue;
 	}
 		

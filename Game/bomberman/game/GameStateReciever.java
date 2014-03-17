@@ -12,15 +12,17 @@ public class GameStateReciever extends Thread {
 	private ArrayBlockingQueue<GameStateUpdate> gameStateUpdates;
 	private int recieved = 0;
 	
-	public GameStateReciever(NetworkManager manager){
+	public GameStateReciever(ArrayBlockingQueue<GameStateUpdate> gameStateUpdates,NetworkManager manager){
 		super("GameStateReciever");			
-		gameStateUpdates = new ArrayBlockingQueue<GameStateUpdate>(500,true);
+		this.gameStateUpdates = gameStateUpdates;	
 		this.manager = manager;
 	}
 	
 	@Override
 	public void run(){
-		while(true){
+		if(manager == null){return;}
+		
+		while(!this.isInterrupted()){
 			DatagramPacket packet = manager.receiveAsynchronous(10, true);
 			if(packet!=null){
 				//System.out.println(playerName+" Recieved Updates:");
@@ -49,6 +51,10 @@ public class GameStateReciever extends Thread {
 	public ArrayBlockingQueue<GameStateUpdate> getGameStateUpdates() {
 		// TODO Auto-generated method stub
 		return gameStateUpdates;
+	}
+	
+	public void setNetworkManager(NetworkManager manager){
+		this.manager = manager;
 	}
 	
 }

@@ -16,6 +16,7 @@ public class GameResolver extends Thread{
 	private BombScheduler bombScheduler;
 	private GameServer gameServer;	
 	private GameStateUpdater clientUpdater;
+	private boolean gameIsRunning = false;
 	
 	
 	private ArrayBlockingQueue<GameEvent> gameEventQueue;
@@ -29,7 +30,7 @@ public class GameResolver extends Thread{
 		super("GameResolver");
 		this.gameServer = gameServer;		
 		if (gameServer != null) {
-			gameEventQueue = gameServer.getMessageBuffer();		
+			gameEventQueue = gameServer.getGameEventQueue();		
 		}
 		
 		gameFloor = new Floor(this, isTest);	
@@ -42,20 +43,26 @@ public class GameResolver extends Thread{
 	public void run(){
 		clientUpdater.start();	
 		bombScheduler.start();
-		while(gameServer.isRunning()){
+		while(gameServer.isRunning() && gameIsRunning){
 			processEvents();
 		}		
 	}	
 	
-	private void processEvents() {
-		GameEvent event = (GameEvent) gameEventQueue.poll();	
-		if(event == null){return;}
-		processEvent(event);
-	}
 	/**
 	 * Remove messages from the server queue and process them
 	 */
-	public void processEvent(GameEvent event){
+	private void processEvents(){		
+		GameEvent event = null;
+		/*try {
+			event = gameEventQueue.poll(10, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		
+		event = gameEventQueue.poll();
+		if(event == null){return;}
+		
 		if (!senderIsAllowed(event)) {
 			return;
 		}		
@@ -106,6 +113,8 @@ public class GameResolver extends Thread{
 		
 		if (type.equals("END_GAME")) {
 			gameServer.broadCastEndGame(gameFloor.getAddressOfAllPlayers());
+			gameIsRunning = false;
+			//Should we stop the gameSever? May be let players join a new game?
 			gameServer.stopGracefully();			
 		}
 		
@@ -126,17 +135,17 @@ public class GameResolver extends Thread{
 		bombFactory.makeBombFor(player,gameFloor);			
 	}
 	
-	private void processMoveEvent(GameEvent action) {
-		if(action.getType() != GameEvent.Type.MOVE){return;}	
+	private void processMoveEvent(GameEvent event) {
+		if(event.getType() != GameEvent.Type.MOVE){return;}	
 		Player player = null;
-		if(gameFloor.hasPlayer(action.getSenderAddress())){
-			player = gameFloor.getPlayer(action.getSenderAddress());
+		if(gameFloor.hasPlayer(event.getSenderAddress())){
+			player = gameFloor.getPlayer(event.getSenderAddress());
 		}
 		
 		if (player == null) {
 			return;
 		}		
-		String direction = (String)(action.getParameter("DIR"));
+		String direction = (String)(event.getParameter("DIR"));
 
 		if (direction.equalsIgnoreCase("UP")) {
 			player.moveUp();
@@ -175,22 +184,32 @@ public class GameResolver extends Thread{
 	}	
 	
 	private boolean senderIsAllowed(GameEvent event){
-		
-		NetworkAddress senderAddress = event.getSenderAddress();
-		
-		if(event.isFromServer()){
-			return true;
+				
+		if(event.isFromPlayer()){
+			NetworkAddress senderAddress = event.getSenderAddress();
+			if (senderIsAlive(senderAddress) && senderHasJoinedGame(senderAddress)){
+				return true;
+			}else{
+				return false;
+			}
 		}
 		
-		if (senderIsAlive(senderAddress) && senderHasJoinedGame(senderAddress)){
-			return true;
-		}		
-		return false;
+		return true;
+		
 	}
 	
 	public BombFactory getBombFactory(){
 		return bombFactory;
 		
+	}
+
+	public boolean gameIsRunning() {
+		
+		return gameIsRunning;
+	}
+
+	public void setGameIsRunning(boolean b) {
+		gameIsRunning = b;		
 	}
 	
 	

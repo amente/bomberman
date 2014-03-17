@@ -52,13 +52,12 @@ public class GameProtocol {
 		String[] params = message.split(" ", 2);
 		if(params.length < 1) { return null;}
 		
-		GameEvent event = null;
+		GameEvent event = new GameEvent();;
 
 		// For game messages we don't need to check for player
 
 		if (params[0].equalsIgnoreCase("Game")) {
-			if (params[1].equalsIgnoreCase("JOIN")) {
-				event = new GameEvent();
+			if (params[1].equalsIgnoreCase("JOIN")) {				
 				event.setType(GameEvent.Type.GAMECHANGE);
 				event.addParameter("CALL", "JOIN");
 			} else if (params[1].equalsIgnoreCase("START")) {
@@ -74,13 +73,11 @@ public class GameProtocol {
 		if (params[0].equalsIgnoreCase("Move")) {
 			if (params.length != 2) {
 				return null;
-			}
-			event = new GameEvent();
+			}			
 			event.setType(GameEvent.Type.MOVE);
 			event.addParameter("DIR", params[1]);
 
-		} else if (params[0].equalsIgnoreCase("BOMB")) {
-			event = new GameEvent();
+		} else if (params[0].equalsIgnoreCase("BOMB")) {			
 			event.setType(GameEvent.Type.BOMB);
 
 		}
