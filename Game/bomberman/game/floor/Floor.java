@@ -49,16 +49,22 @@ public class Floor {
 	private TiledMap map;
 	private int xSize;
 	private int ySize;
-		
 	
-	Random rand = new Random();
-	
+	public int getXSize() { return xSize; }
+	public int getYSize() { return ySize; }
 	
 	public Floor(GameResolver gameResolver){	
+		this(gameResolver, false);
+	}
+	
+	public Floor(GameResolver gameResolver, boolean isTest){	
 		gameStateUpdateQueue = new ArrayBlockingQueue<GameStateUpdate>(500,true);
-		//producer = new Producer<GameStateUpdate>(gameStateUpdates);
 		this.gameResolver = gameResolver;
-		initialize();		
+		if (!isTest) {
+			initialize();
+		} else {
+			testInitialize();
+		}
 	}	
 	
 	private void initialize(){
@@ -67,6 +73,24 @@ public class Floor {
 		xSize = tiles[0].length;
 		ySize = tiles.length;
 		players = new HashMap<NetworkAddress,Player>();		
+	}
+	
+	private void testInitialize() {
+		players = new HashMap<NetworkAddress,Player>();
+		xSize = 20;
+		ySize = 20;
+		tiles = new Tile[ySize][xSize];
+		
+		for (int x = 0; x < xSize; x++) {
+			for (int y = 0; y < ySize; y++) {
+				if (x == 0 || y == 0 || x == xSize-1 || y == ySize-1) {
+					tiles[x][y] = new Tile(x, y, new Wall(this));;
+				} else {
+					tiles[x][y] = new Tile(x,y,null);
+					emptyTiles.add(tiles[x][y]);
+				}
+			}
+		}
 	}
 	
 	public boolean moveObjectTo(FloorObject o,int x,int y,MovementType dir)

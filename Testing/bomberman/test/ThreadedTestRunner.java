@@ -5,6 +5,15 @@
 
 package bomberman.test;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import bomberman.game.GameEvent;
+import bomberman.game.GameProtocol;
+import bomberman.game.GameResolver;
+import bomberman.game.GameServer;
+import bomberman.game.floor.Player;
+
 public class ThreadedTestRunner {
 	public static boolean RunTest(Runnable test, int numThreads) {
 		Thread[] threads = new Thread[numThreads];
@@ -26,7 +35,7 @@ public class ThreadedTestRunner {
 		return true;
 	}
 	
-	public static boolean RunTests(Runnable[] tests) {
+	public static boolean RunTests(Runnable[] tests, boolean join) {
 		Thread[] threads = new Thread[tests.length];
 		
 		for (int i = 0; i < tests.length; i++) {
@@ -35,14 +44,84 @@ public class ThreadedTestRunner {
 			t.start();
 		}
 		
-		for (int i = 0; i < tests.length; i++){
-			try {
-				threads[i].join();
-			} catch (InterruptedException e) {
-				return false;
+		if (join) {
+			for (int i = 0; i < tests.length; i++){
+				try {
+					threads[i].join();
+				} catch (InterruptedException e) {
+					return false;
+				}
 			}
 		}
 		
 		return true;
+	}
+	
+	public static void RunGameTest(
+			String[] player1Actions, int initialXP1, int initialYP1,
+			String[] player2Actions, int initialXP2, int initialYP2,
+			IGameStateAssertion preAssertion, IGameStateAssertion postAssertion,
+			int expectedTestTime
+	) {
+		GameResolver resolver = TestResolverFactory.CreateGameResolver();
+		
+		Player player1 = TestPlayerFactory.createPlayer(resolver, initialXP1, initialYP1);
+		Player player2 = TestPlayerFactory.createPlayer(resolver, initialXP2, initialYP2);
+		
+		List<GameEvent> events = new ArrayList<GameEvent>();
+		for(int i = 0; i < player1Actions.length; i++) {
+			GameEvent p1Event = GetEvent(player1Actions[i], player1);
+			events.add(p1Event);
+		}
+		
+		for(int i = 0; i < player2Actions.length; i++) {
+			GameEvent p2Event = GetEvent(player2Actions[i], player2);
+			events.add(p2Event);
+		}
+		
+		if (preAssertion != null) {
+			preAssertion.AssertState(resolver);
+		}
+		
+		ThreadedTestRunner.RunGameTest(events, resolver);
+
+		try { Thread.sleep(expectedTestTime); } catch (InterruptedException e) {}
+
+		TestPlayerFactory.playerNum = 1;
+		resolver.getGameServer().stopGracefully();
+		postAssertion.AssertState(resolver);
+		
+		try { Thread.sleep(100); } catch (InterruptedException e) {}
+	}
+	
+	private static GameEvent GetEvent(String eventString, Player player) {
+		GameEvent action = GameProtocol.getInstance().getEvent(eventString);
+		action.setSenderAddress(player.getAddress());
+		
+		return action;
+	}
+
+	public static void RunGameTest(List<GameEvent> events, GameResolver resolver) {
+		Thread[] threads = new Thread[events.size()];
+		
+		final GameServer server = resolver.getGameServer();
+		
+		int counter = 0;
+		
+		for(final GameEvent event : events) {
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					server.addEvent(event);
+				}
+			};
+			
+			threads[counter++] = new Thread(
+				r	
+			);
+		}
+		RunTests(threads, false);
+		
+		try { Thread.sleep(100); } catch (InterruptedException e) {}
 	}
 }

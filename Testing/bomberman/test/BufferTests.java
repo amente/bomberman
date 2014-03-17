@@ -26,7 +26,7 @@ public class BufferTests implements Runnable {
 	private Integer testNum = -1;
 	private boolean flush = false;
 	
-	private int numTestRuns = 1000; // 10000 tests takes ~ 140 seconds on my machine
+	private int numTestRuns = 100; // 10000 tests takes ~ 140 seconds on my machine
 									// 1000 tests ~ 10 seconds
 	
 	@Test

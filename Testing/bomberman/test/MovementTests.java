@@ -4,9 +4,10 @@ import static org.junit.Assert.fail;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import bomberman.game.GameAction;
+import bomberman.game.GameEvent;
 import bomberman.game.GameProtocol;
 import bomberman.game.GameResolver;
 import bomberman.game.floor.Player;
@@ -31,33 +32,69 @@ public class MovementTests {
 	) {
 		GameResolver resolver = new GameResolver(null, true);
 		
-		NetworkAddress address = null;
-		try {
-			address = new NetworkAddress(
-					InetAddress.getLocalHost().getHostAddress(), 
-					6000
-			);
-		} catch (UnknownHostException e) { fail(); }
-		if (address == null) { fail(); }
+		Player player = TestPlayerFactory.createPlayer(resolver, initialX, initialY);
+		if (expectedX == -1) { expectedX = player.getX(); expectedY = player.getY(); }
 		
-		if (initialX == -1) {
-			initialX = resolver.getGameFloor().getXSize() - 2;
-			initialY = resolver.getGameFloor().getYSize() - 2;
-			expectedX = initialX;
-			expectedY = initialY;
-		}
-		
-		resolver.getGameFloor().addPlayer(address, initialX, initialY);
-		Player player = resolver.getGameFloor().getPlayer("Player1");
-		if (player == null) { fail(); }
-		
-		GameAction action = GameProtocol.getInstance().getAction(actionString);
+		GameEvent action = GameProtocol.getInstance().getEvent(actionString);
 		action.setSenderAddress(player.getAddress());
 		
-		resolver.processAction(action);
+		resolver.processEvent(action);
 		
 		if (player.getX() != expectedX || player.getY() != expectedY) {
 			fail("x should be " + expectedX + " but is " + player.getX() + ". y should be " + expectedY + " but is " + player.getY());
 		}
+		
+		TestPlayerFactory.playerNum = 1;
+	}
+	
+	@Test public void TwoPlayersMove() { 
+		IGameStateAssertion postAssertion = new IGameStateAssertion() {
+			@Override
+			public void AssertState(GameResolver r) {
+				Player p1 = r.getGameFloor().getPlayer("Player1");
+				Player p2 = r.getGameFloor().getPlayer("Player2");
+				Assert.assertEquals(p1.getX(), 2);
+				Assert.assertEquals(p1.getY(), 3);
+				
+				Assert.assertEquals(p2.getX(), 6);
+				Assert.assertEquals(p2.getY(), 5);
+			}
+		};
+		
+		ThreadedTestRunner.RunGameTest(
+			new String[] { "Move DOWN" },
+			2,
+			2, 
+			new String[] { "Move RIGHT" }, 
+			5, 
+			5, 
+			null, 
+			postAssertion, 
+			0
+		);
+	}
+	
+	@Test public void TwoPlayersMoveIntoEachOther() { 
+		IGameStateAssertion postAssertion = new IGameStateAssertion() {
+			@Override
+			public void AssertState(GameResolver r) {
+				Player p1 = r.getGameFloor().getPlayer("Player1");
+				Player p2 = r.getGameFloor().getPlayer("Player2");
+				Assert.assertFalse(p1.isAlive());
+				Assert.assertFalse(p2.isAlive());
+			}
+		};
+		
+		ThreadedTestRunner.RunGameTest(
+			new String[] { "Move RIGHT" },
+			2,
+			2, 
+			new String[] {}, 
+			3, 
+			2, 
+			null, 
+			postAssertion, 
+			100
+		);
 	}
 }

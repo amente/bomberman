@@ -40,13 +40,13 @@ public class GameProtocol {
 	public GameEvent getEvent(DatagramPacket packet){	
 		String message = new String(packet.getData(),packet.getOffset(),packet.getLength());
 		NetworkAddress senderAddress = new NetworkAddress(packet.getSocketAddress());
-		GameAction action = getAction(message);
+		GameEvent action = getEvent(message);
 
 		action.setSenderAddress(senderAddress);
 		return action;
 	}
 	
-	public GameAction getAction(String message){	
+	public GameEvent getEvent(String message){	
 		// TODO: Parse the message according to the protocol and make an action
 		
 		String[] params = message.split(" ", 2);
@@ -61,12 +61,10 @@ public class GameProtocol {
 				event = new GameEvent();
 				event.setType(GameEvent.Type.GAMECHANGE);
 				event.addParameter("CALL", "JOIN");
-				event.setSenderAddress(senderAddress);
 			} else if (params[1].equalsIgnoreCase("START")) {
 				event = new GameEvent();
 				event.setType(GameEvent.Type.GAMECHANGE);
 				event.addParameter("CALL", "START");
-				event.setSenderAddress(senderAddress);
 			}
 		}
 
@@ -86,12 +84,8 @@ public class GameProtocol {
 			event.setType(GameEvent.Type.BOMB);
 
 		}
-
-		// Bind action to sender address
-		event.setSenderAddress(senderAddress);
+		
 		return event;
-		
-		
 	}
 
 

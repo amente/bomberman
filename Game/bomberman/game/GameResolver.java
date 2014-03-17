@@ -20,13 +20,19 @@ public class GameResolver extends Thread{
 	
 	private ArrayBlockingQueue<GameEvent> gameEventQueue;
 	private int numEvents;
+	
+	public GameResolver(GameServer gameServer) {
+		this(gameServer, false);
+	}
 		
-	public GameResolver(GameServer gameServer){
+	public GameResolver(GameServer gameServer, boolean isTest){
 		super("GameResolver");
 		this.gameServer = gameServer;		
-		gameEventQueue =gameServer.getMessageBuffer();		
+		if (gameServer != null) {
+			gameEventQueue = gameServer.getMessageBuffer();		
+		}
 		
-		gameFloor = new Floor(this);	
+		gameFloor = new Floor(this, isTest);	
 		bombFactory  = new BombFactory();
 		bombScheduler = new BombScheduler(bombFactory,this);		
 		clientUpdater = new GameStateUpdater(this);			
@@ -41,13 +47,15 @@ public class GameResolver extends Thread{
 		}		
 	}	
 	
+	private void processEvents() {
+		GameEvent event = (GameEvent) gameEventQueue.poll();	
+		if(event == null){return;}
+		processEvent(event);
+	}
 	/**
 	 * Remove messages from the server queue and process them
 	 */
-	private void processEvents(){		
-		GameEvent event  =  (GameEvent) gameEventQueue.poll();	
-		if(event == null){return;}
-		
+	public void processEvent(GameEvent event){
 		if (!senderIsAllowed(event)) {
 			return;
 		}		
@@ -86,7 +94,7 @@ public class GameResolver extends Thread{
 	private void processExplosionAction(GameEvent action) {
 		if(!(action.getType() == GameEvent.Type.EXPLOSION)){return;}
 		
-		Bomb bomb = (Bomb)(action.getParameter("BOMB"));		
+		Bomb bomb = (Bomb)(action.getParameter("BOMB"));
 		gameFloor.explodeBomb(bomb);
 		
 	}
