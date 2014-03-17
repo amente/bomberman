@@ -40,41 +40,33 @@ public class GameProtocol {
 	public GameEvent getEvent(DatagramPacket packet){	
 		// TODO: Parse the message according to the protocol and make an action
 		String message = new String(packet.getData(),packet.getOffset(),packet.getLength());
+		System.out.println("Recieved "+ message);
 		NetworkAddress senderAddress = new NetworkAddress(packet.getSocketAddress());
 		String[] params = message.split(" ", 2);
 		if(params.length < 1) { return null;}
 		
-		GameEvent event = null;
+		GameEvent event = new GameEvent();;
 
 		// For game messages we don't need to check for player
 
 		if (params[0].equalsIgnoreCase("Game")) {
-			if (params[1].equalsIgnoreCase("JOIN")) {
-				event = new GameEvent();
+			if (params[1].equalsIgnoreCase("JOIN")) {				
 				event.setType(GameEvent.Type.GAMECHANGE);
 				event.addParameter("CALL", "JOIN");
 				event.setSenderAddress(senderAddress);
-			} else if (params[1].equalsIgnoreCase("START")) {
-				event = new GameEvent();
+			} else if (params[1].equalsIgnoreCase("START")) {				
 				event.setType(GameEvent.Type.GAMECHANGE);
 				event.addParameter("CALL", "START");
 				event.setSenderAddress(senderAddress);
 			}
-		}
-
-		// For all other messages, packets are ignored if player is not in
-		// the game
-
-		if (params[0].equalsIgnoreCase("Move")) {
+		}else if (params[0].equalsIgnoreCase("Move")) {
 			if (params.length != 2) {
 				return null;
-			}
-			event = new GameEvent();
+			}			
 			event.setType(GameEvent.Type.MOVE);
 			event.addParameter("DIR", params[1]);
 
-		} else if (params[0].equalsIgnoreCase("BOMB")) {
-			event = new GameEvent();
+		} else if (params[0].equalsIgnoreCase("BOMB")) {			
 			event.setType(GameEvent.Type.BOMB);
 
 		}

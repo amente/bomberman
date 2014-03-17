@@ -50,22 +50,26 @@ public class TestPlayer extends Thread{
 			
 			String[] lineArr = cmd.split(" ");			
 			if(lineArr[0].equalsIgnoreCase("Move")){						
-					//System.out.println("Sending Move "+lineArr[1]);
+					System.out.println("Sending Move "+lineArr[1]);
 					networkManager.sendAsynchronous(cmd.trim(),serverAddress,true);					
 			}else if(lineArr[0].equalsIgnoreCase("Bomb")){
 				//System.out.println("Sending Bomb");
 				networkManager.sendAsynchronous(cmd.trim(),serverAddress,true);
-			}		 
+			}
 			
-			//Send command every 200 milliseconds
+
 			try {
-				Thread.sleep(200); 
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}	
-		}			
-	
+			}
+		}
+		
+		
+		while(!isInterrupted());
+		
+		networkManager.close();
 	}
 
 	public NetworkManager getNetworkManager() {

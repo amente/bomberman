@@ -1,6 +1,7 @@
 package bomberman.game;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import bomberman.game.floor.Bomb;
 import bomberman.game.floor.BombFactory;
@@ -24,7 +25,7 @@ public class GameResolver extends Thread{
 	public GameResolver(GameServer gameServer){
 		super("GameResolver");
 		this.gameServer = gameServer;		
-		gameEventQueue =gameServer.getMessageBuffer();		
+		gameEventQueue =gameServer.getGameEventQueue();		
 		
 		gameFloor = new Floor(this);	
 		bombFactory  = new BombFactory();
@@ -45,7 +46,15 @@ public class GameResolver extends Thread{
 	 * Remove messages from the server queue and process them
 	 */
 	private void processEvents(){		
-		GameEvent event  =  (GameEvent) gameEventQueue.poll();	
+		GameEvent event = null;
+		/*try {
+			event = gameEventQueue.poll(10, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		
+		event = gameEventQueue.poll();
 		if(event == null){return;}
 		
 		if (!senderIsAllowed(event)) {

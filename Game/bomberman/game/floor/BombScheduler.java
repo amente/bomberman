@@ -28,7 +28,9 @@ public class BombScheduler  extends Thread{
 	public void run(){
 		while(gameResolver.getGameServer().isRunning()){
 			Bomb bomb  =  bombQueue.poll();
-			attachTimer(bomb);			
+			if(bomb!=null){
+				attachTimer(bomb);
+			}
 		}	
 	}
 	

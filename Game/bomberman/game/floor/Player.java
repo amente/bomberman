@@ -40,7 +40,9 @@ public class Player extends Movable {
 				System.out.println(" Game Over!");
 			}else if(!d.isVisible()){				
 				d.setVisible(true);
-				gameFloor.moveObjectTo(this, d.getX(), d.getY(), dir);
+				//For test only
+				d.setOpen(true);
+				gameFloor.moveObjectTo(this, d.getX(), d.getY(), dir);				
 			}
 		}else if(o.getType().equalsIgnoreCase("Enemy")){
 			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);			

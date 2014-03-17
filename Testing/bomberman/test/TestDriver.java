@@ -6,8 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import bomberman.game.GameStateReciever;
-
 /**
  * 
  *Runs an automated test by reading from test set up file
@@ -85,11 +83,10 @@ public class TestDriver {
 		testPlayers.get(0).sendStartGame();
 		
 		
-		//Start the spectator GUI	
-		GameStateReciever receiver = new GameStateReciever(testPlayers.get(0).getNetworkManager());
-		TestSpectator p1GUI = new TestSpectator(receiver);
-		receiver.start();
-		TestSpectator.startGUIThread(p1GUI);
+		//Start the spectator GUI		
+		TestSpectator p1GUI = new TestSpectator(testPlayers.get(0));		
+		Thread guiThread = p1GUI.start();
+		
 		
 		
 		// Let all players start sending their commands		
@@ -101,12 +98,22 @@ public class TestDriver {
 		
 		for(TestPlayer player: testPlayers){
 			try {
-				player.join();
+				player.join();				
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}							
-		}	
+		}		
+		
+		//Join The GUI Thread
+		
+		try {
+			guiThread.join();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 		
 		try {
 			Thread.sleep(2000);

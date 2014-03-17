@@ -84,7 +84,7 @@ public class Floor {
 			o.setLocationTo(x, y);
 			//System.out.println("x: " + x + " y: " + y);
 			tiles[x][y].replaceObject(o); // Move to new location 
-			//System.out.println(o.getName()+" moved to "+x+","+y);
+			System.out.println(o.getName()+" moved to "+x+","+y);
 			addUpdate(GameStateUpdate.makeUpdateForMove(o,dir));			
 			return true;
 		}else{
@@ -228,6 +228,7 @@ public class Floor {
 	}
 	
 	public void explodeBomb(Bomb bomb){		
+		if(bomb==null){return;}
 		System.out.println("Bomb Exploded"+" x:"+bomb.getX()+" y:"+bomb.getY());
 		
 		addUpdate(GameStateUpdate.makeUpdateForExplodeBomb(bomb));	
