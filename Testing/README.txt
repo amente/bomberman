@@ -29,7 +29,7 @@ Test 2: Deploying players on the same machine vs. different machines
 	
 	Results:
 		From same machine: 
-			Minimum latency: <0.1ms
+			Minimum latency: 0.0ms
 			Average latency: 4.86ms
 			Maximum latency: 10.0ms
 			
@@ -51,18 +51,31 @@ Test 3: High load vs low load
 	Results:
 		From one player test:
 			Test took 5211.0 milliseconds.
-			Minimum latency - 0.0
-			Average latency - 5.142857142857143
-			Maximum latency - 10.0
+			Minimum latency - 0.0ms
+			Average latency - 5.142857142857143ms
+			Maximum latency - 10.0ms
 			
 		From multi-player test:
 			Test took 5913.0 milliseconds.
-			Minimum latency - 0.0
-			Average latency - 6.0754716981132075
-			Maximum latency - 16.0
+			Minimum latency - 0.0ms
+			Average latency - 6.0754716981132075ms
+			Maximum latency - 16.0ms
 				
 	As we can see, the server spent a longer time on the multi-player test than the one player test,
 	but the GUI update for the players still updates quickly. This implies that the GUI's are all
-	updated fast, but the actual game does slow down a bit.
+	updated responsively, but the actual game does slow down a bit.
 
-			
+Test 4: Packet loss
+	We ran a test with an equal number of up moves and down moves. If there is no packet loss, 
+	then every time this test is run then the player should end up at the same position that 
+	they started at (as the number of up moves and down moves are equal, and they never hit 
+	a wall/box). 
+	
+	Results:
+		After two runs, it is notable that the character does not end the test at the same
+		point that it started at (or at the same point as the other test). 
+		
+	Therefore, we experience packet loss when a player sends commands. However, a player
+	will often spam their movement keys/bomb keys more than one time trying to move/place a bomb,
+	so packet loss at this point does not actually matter, as from the player's view it should
+	not be visible (the way most players play games).
