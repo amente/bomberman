@@ -94,7 +94,9 @@ public class GameStateUpdate {
 		}else if(stype.equalsIgnoreCase(UpdateType.DEL.name())){
 			type = UpdateType.DEL;
 			parameters.put("OBJECT_NAME", tokens[1]);			
-			parameters.put("OBJECT_TYPE",tokens[2]);		
+			parameters.put("OBJECT_TYPE",tokens[2]);	
+			parameters.put("X_LOC", tokens[3]);
+			parameters.put("Y_LOC", tokens[4]);
 		}else if(stype.equalsIgnoreCase(UpdateType.FULL.name())){
 			type = UpdateType.FULL;
 			parameters.put("STATE",tokens[1]);
@@ -136,7 +138,9 @@ public class GameStateUpdate {
 	public static GameStateUpdate makeUpdateForRemoveObject(FloorObject o){
 		GameStateUpdate update = new GameStateUpdate(GameStateUpdate.UpdateType.DEL);
 		update.addParameter("OBJECT_NAME", o.getName());
-		update.addParameter("OBJECT_TYPE", o.getType()); 				
+		update.addParameter("OBJECT_TYPE", o.getType());
+		update.addParameter("X_LOC", ""+o.getX());
+		update.addParameter("Y_LOC", ""+o.getY());
 		return update;		
 	}
 	

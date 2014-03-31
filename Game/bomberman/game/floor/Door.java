@@ -2,8 +2,8 @@ package bomberman.game.floor;
 
 public class Door extends FloorObject {
 
-	private boolean isVisible = false;
-	private boolean isOpen = false;
+	private boolean isVisible = true;
+	private boolean isOpen = true;
 	
 	
 	public Door(Floor floor) {

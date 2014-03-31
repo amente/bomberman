@@ -23,12 +23,15 @@ public class Player extends Movable {
 		FloorObject o = loc.getObject();		
 		if(o.getType().equalsIgnoreCase("Player")){			
 			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);	
-			gameFloor.addkillPlayerEvent((Player)o);
-			gameFloor.addkillPlayerEvent(this);
-			System.out.println(getName()+ " moved to space occupied by "+ o.getName());			
+			//Sometimes this logic may glitch for fast movements so added this guard
+			if(o!=this){
+				gameFloor.addkillPlayerEvent((Player)o);
+				gameFloor.addkillPlayerEvent(this);
+				System.out.println(getName()+ " moved to space occupied by "+ o.getName());	
+			}
 		}else if(o.getType().equalsIgnoreCase("PowerUp")){
 			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);
-			gameFloor.givePowerUp(this);
+			gameFloor.givePowerUp(this,(PowerUp)o);
 			System.out.println(getName()+ " moved to space occupied by "+ o.getName());
 			System.out.println(getName()+ "has got a power up!");
 		}else if(o.getType().equalsIgnoreCase("Door")){

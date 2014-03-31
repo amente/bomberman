@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Set;
 
 import org.newdawn.slick.SlickException;
@@ -26,7 +27,7 @@ import bomberman.game.network.NetworkAddress;
 public class Floor {	
 	
 	//For testing only
-	boolean next = false;
+	//boolean next = false;
 	private int addedUpdates = 0;
 	
 	public static final int DEFAULTX = 0; // Default location for an object on the floor
@@ -45,6 +46,7 @@ public class Floor {
 	private TiledMap map;
 	private int xSize;
 	private int ySize;
+	private Random rand = new Random(1992);
 	
 	public int getXSize() { return xSize; }
 	public int getYSize() { return ySize; }
@@ -144,16 +146,16 @@ public class Floor {
 	 */
 	public String addPlayer(NetworkAddress playerAddress) {
 		// Pop the next empty tile
-		//Tile t = emptyTiles.remove(rand.nextInt(emptyTiles.size()));
-		//return addPlayer(playerAddress,1,1);
+		Tile t = emptyTiles.remove(rand .nextInt(emptyTiles.size()));
+		return addPlayer(playerAddress,t.x,t.y);
 		
-		//For testing only
+		/*For testing only
 		if(!next){
 			next = true;
 			return addPlayer(playerAddress,1,1);			
 		}else{
 			return addPlayer(playerAddress,5,1);
-		}		
+		}	*/	
 	}
 	
 	/**
@@ -223,8 +225,9 @@ public class Floor {
 		gameResolver.addEvent(event);
 	}
 
-	public void givePowerUp(Player player) {	
-		gameResolver.getBombFactory().increaseLimit(player);		
+	public void givePowerUp(Player player,PowerUp powerUp) {	
+		gameResolver.getBombFactory().increaseLimit(player);
+		 addUpdate(GameStateUpdate.makeUpdateForRemoveObject(powerUp));	
 	}	
 
 	public void killPlayer(Player p) {

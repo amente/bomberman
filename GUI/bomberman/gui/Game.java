@@ -228,11 +228,27 @@ public class Game extends BasicGame{
 			}else if (update.getType().equals(GameStateUpdate.UpdateType.DEL)) {				
 			
 				String name = update
-						.getParameter("OBJECT_NAME");									
-			    System.out.println("Remove "+name);
-				GUIObject o = objects.get(name);
-				if(o!=null){
-					o.setRedraw(false);
+						.getParameter("OBJECT_NAME");	
+				String type = update.getParameter("OBJECT_TYPE");
+				if(!type.equalsIgnoreCase("Player") && !type.equalsIgnoreCase("Bomb")){
+					name = name.toLowerCase()+"x"+update.getParameter("X_LOC")+"y"+update.getParameter("Y_LOC");
+					if(objects.containsKey(name)){
+						GUIObject o = objects.get(name);
+						System.out.println("Remove "+name);
+						GUITile replacer = new GUITile();
+						replacer.setX(o.getX());
+						replacer.setY(o.getY());
+						objects.remove(name);
+						objects.put("tile"+"x"+update.getParameter("X_LOC")+"y"+update.getParameter("Y_LOC"),replacer);
+					}		
+				}else{				
+					System.out.println("Remove "+name);
+					GUIObject o = objects.get(name);
+					if(o!=null){
+						o.setRedraw(false);
+					}else{
+						System.out.print(name+ "not found!");
+					}
 				}
 				
 		}else if (update.getType().equals(GameStateUpdate.UpdateType.EXPLODEBOMB)) {				
@@ -258,30 +274,30 @@ public class Game extends BasicGame{
 						//System.out.println("Found Box: "+ x+ ","+y);
 						box.setX(x);
 						box.setY(y);
-						objects.put("box"+box.hashCode(),box);
+						objects.put("box"+"x"+x+"y"+y,box);
 					}else if(col.equalsIgnoreCase("PowerUp")){
 						GUIPowerUp powerUp = new GUIPowerUp();
 						//System.out.println("Found PowerUp: "+ x+ ","+y);
 						powerUp.setX(x);
 						powerUp.setY(y);
-						objects.put("powerup"+powerUp.hashCode(),powerUp);
+						objects.put("powerup"+"x"+x+"y"+y,powerUp);
 					}else if(col.equalsIgnoreCase("Wall")){
 						GUIWall wall = new GUIWall();
 						//System.out.println("Found Wall: "+ x+ ","+y);
 						wall.setX(x);
 						wall.setY(y);
-						objects.put("wall"+wall.hashCode(),wall);
+						objects.put("wall"+"x"+x+"y"+y,wall);
 					}else if(col.equalsIgnoreCase("Door")){
 						GUIDoor door = new GUIDoor();
 						//System.out.println("Found Door: "+ x+ ","+y);
 						door.setX(x);
 						door.setY(y);
-						objects.put("wall"+door.hashCode(),door);
+						objects.put("door"+"x"+x+"y"+y,door);
 					}else{
 						GUITile tile = new GUITile();
 						tile.setX(x);
 						tile.setY(y);
-						objects.put("tile"+tile.hashCode(), tile);
+						objects.put("tile"+"x"+x+"y"+y, tile);
 					}
 					x++;
 				}
