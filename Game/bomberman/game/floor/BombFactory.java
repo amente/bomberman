@@ -53,7 +53,9 @@ public class BombFactory {
 	public void increaseLimit(Player player){
 		String playerName = player.getName();
 		if(!allowedBombPerPlayer.containsKey(playerName)){
-			allowedBombPerPlayer.put(playerName,allowedBombPerPlayer.get(playerName) +1);
+			allowedBombPerPlayer.put(playerName,1);
+		} else {
+			allowedBombPerPlayer.put(playerName, allowedBombPerPlayer.get(playerName) + 1);
 		}
 	}
 }

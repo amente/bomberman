@@ -26,7 +26,7 @@ import bomberman.game.network.NetworkAddress;
 public class Floor {	
 	
 	//For testing only
-	boolean next = false;
+	int currNumPlayers = 0;
 	private int addedUpdates = 0;
 	
 	public static final int DEFAULTX = 0; // Default location for an object on the floor
@@ -107,7 +107,7 @@ public class Floor {
 			addUpdate(GameStateUpdate.makeUpdateForMove(o,dir));			
 			return true;
 		}else{
-			//Moved to occupied space, what to do with it? Callback
+			//Moved to occupied space, what to do with it? Callbacks
 			return ((Movable)o).movedToOccupiedGrid(tiles[x][y],dir);
 		}		
 	}	
@@ -148,12 +148,19 @@ public class Floor {
 		//return addPlayer(playerAddress,1,1);
 		
 		//For testing only
-		if(!next){
-			next = true;
+		if(currNumPlayers == 0){
+			currNumPlayers++;
 			return addPlayer(playerAddress,1,1);			
-		}else{
+		} else if (currNumPlayers == 1) {
+			currNumPlayers++;
 			return addPlayer(playerAddress,5,1);
-		}		
+		} else if (currNumPlayers == 2) {
+			currNumPlayers++;
+			return addPlayer(playerAddress, 1, ySize - 2);
+		} else {
+			currNumPlayers++;
+			return addPlayer(playerAddress, xSize - 2, ySize - 2);
+		}
 	}
 	
 	/**

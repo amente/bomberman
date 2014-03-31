@@ -19,7 +19,6 @@ public class Player extends Movable {
 
 	@Override
 	public boolean movedToOccupiedGrid(Tile loc,MovementType dir) {
-		
 		FloorObject o = loc.getObject();		
 		if(o.getType().equalsIgnoreCase("Player")){			
 			gameFloor.MoveAnotherObjectTo(this, o.getX(), o.getY(), dir);	

@@ -69,15 +69,20 @@ public class TestSpectator extends BasicGame{
 	@Override
 	public void update(GameContainer container, int delta) throws SlickException {
 		// TODO Auto-generated method stub
+		double prevTime = System.currentTimeMillis();
 		
 		GameStateUpdate update = null;
 		try {
 			update = gameStateUpdateQueue.poll(10, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			finish();
+			return;
 		}
 		if (update != null) {
+			double nowTime = System.currentTimeMillis() - prevTime;
+			TestDriver.latencies.add(new Tuple<String,Double>("GUI Update", nowTime));
+			
 			updatesCommited++;
 			System.out.println("Commited Updates:"+updatesCommited);
 			
@@ -200,9 +205,8 @@ public class TestSpectator extends BasicGame{
 			
 			*/
 		}
-
-
-		}		
+			
+		}
 	    		
 	}    
 	
