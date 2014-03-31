@@ -1,26 +1,25 @@
 package bomberman.game;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
-import bomberman.game.network.NetworkAddress;
 
 public class GameStateUpdater extends Thread {
 
-	private GameResolver gameResolver; 
-	
-	ArrayBlockingQueue<GameStateUpdate> gameStateUpdateQueue;
-	
+	private boolean isStopped = false; 	
 	private int numSent = 0;
+
+	private GameResolver gameResolver;
 	public GameStateUpdater(GameResolver resolver){
 		super("ClientUpdater");
-		this.gameResolver = resolver;	
-		gameStateUpdateQueue = gameResolver.getGameFloor().getGameStateUpdateQueue();
+		this.gameResolver = resolver;			
 	}
 	
 	@Override
 	public void run(){
-		while(gameResolver.getGameServer().isRunning()){
+		// First update is the full game state
+		GameStateUpdate fullUpdate = gameResolver.getFloorState();
+		gameResolver.sendUpdateMessage(fullUpdate.toString());
+		
+		//All other updates are incremental diffs
+		while(!isStopped){
 			GameStateUpdate update = null;
 			/*try {
 				update = gameStateUpdateQueue.poll(10, TimeUnit.MILLISECONDS);
@@ -28,24 +27,23 @@ public class GameStateUpdater extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}*/		
-			update = gameStateUpdateQueue.poll();
+			
+			update = gameResolver.getUpdate();
 			if(update!=null){
-				//System.out.println("Sent Update "+ update.getType());
+				System.out.println("Sent Update "+ update.getType());
 				String updateMessage = update.toString();
 				System.out.println("Update: "+updateMessage);
-				for (NetworkAddress clientAddress : gameResolver.getGameFloor()
-						.getAddressOfAllPlayers()) {
-					gameResolver
-							.getGameServer()
-							.getNetworkManager()
-							.sendAsynchronous(updateMessage, clientAddress,
-									true);
-
-				}
+				gameResolver.sendUpdateMessage(updateMessage);
 				numSent++;
 			 System.out.println("Updates Sent: "+numSent);
 			}
 		}
+		
+	}
+	
+
+	public void stopGracefully(){	
+		isStopped = true;			
 	}
 	
 }

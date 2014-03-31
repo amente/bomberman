@@ -1,15 +1,19 @@
 package bomberman.game;
 
+import java.net.DatagramPacket;
+import java.net.SocketException;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import bomberman.game.floor.Bomb;
 import bomberman.game.floor.BombFactory;
 import bomberman.game.floor.BombScheduler;
 import bomberman.game.floor.Floor;
+import bomberman.game.floor.Movable;
 import bomberman.game.floor.Player;
 import bomberman.game.network.NetworkAddress;
+import bomberman.game.network.PacketProcessor;
 
-public class GameResolver extends Thread{
+public class GameResolver extends Thread implements PacketProcessor{
 	
 	private Floor gameFloor;
 	private BombFactory bombFactory;
@@ -20,32 +24,61 @@ public class GameResolver extends Thread{
 	
 	
 	private ArrayBlockingQueue<GameEvent> gameEventQueue;
+	private ArrayBlockingQueue<GameStateUpdate> gameStateUpdateQueue;
+	
 	private int numEvents;
 	
-	public GameResolver(GameServer gameServer) {
-		this(gameServer, false);
-	}
-		
-	public GameResolver(GameServer gameServer, boolean isTest){
+	public GameResolver(int port) {
 		super("GameResolver");
-		this.gameServer = gameServer;		
-		if (gameServer != null) {
-			gameEventQueue = gameServer.getGameEventQueue();		
+		try {
+			gameServer = new GameServer(port);
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		gameFloor = new Floor(this, isTest);	
+				
+		gameEventQueue = new ArrayBlockingQueue<GameEvent>(Application.QUEUE_CAPACITY,true);	
+		gameStateUpdateQueue = new ArrayBlockingQueue<GameStateUpdate>(500,true);
+		gameFloor = new Floor(this);	
 		bombFactory  = new BombFactory();
 		bombScheduler = new BombScheduler(bombFactory,this);		
 		clientUpdater = new GameStateUpdater(this);			
-	}	
-			
+	}
+		
+	public GameResolver() {
+		super("GameResolver");		
+				
+		gameEventQueue = new ArrayBlockingQueue<GameEvent>(Application.QUEUE_CAPACITY,true);	
+		gameStateUpdateQueue = new ArrayBlockingQueue<GameStateUpdate>(500,true);
+		gameFloor = new Floor(this);	
+		bombFactory  = new BombFactory();
+		bombScheduler = new BombScheduler(bombFactory,this);		
+		clientUpdater = new GameStateUpdater(this);			
+	}
+	
+				
 	@Override
 	public void run(){
+		
+		// Block and process joins
+		if(gameServer!=null){
+		gameServer.listenForJoin(this);
+		
+		gameServer.setEventQueue(gameEventQueue);
+		gameServer.start();	
+		}
 		clientUpdater.start();	
 		bombScheduler.start();
-		while(gameServer.isRunning() && gameIsRunning){
+		
+		while(gameIsRunning){
 			processEvents();
-		}		
+		}
+		
+		if(gameServer!=null){
+			gameServer.stopGracefully();
+		}
+		
+		clientUpdater.stopGracefully();
 	}	
 	
 	private void processEvents() {
@@ -59,7 +92,7 @@ public class GameResolver extends Thread{
 		
 		event = gameEventQueue.poll();
 		if(event == null){return;}
-		
+		System.out.println(event);
 		processEvent(event);
 	}
 	
@@ -141,33 +174,34 @@ public class GameResolver extends Thread{
 	}
 	
 	private void processMoveEvent(GameEvent event) {
-		if(event.getType() != GameEvent.Type.MOVE){return;}	
-		Player player = null;
-		if(gameFloor.hasPlayer(event.getSenderAddress())){
-			player = gameFloor.getPlayer(event.getSenderAddress());
-		}
+		if(event.getType() != GameEvent.Type.MOVE){return;}
 		
-		if (player == null) {
+		Movable sender = null;
+		if (event.isFromPlayer()) {
+			if (gameFloor.hasPlayer(event.getSenderAddress())) {
+				sender = gameFloor.getPlayer(event.getSenderAddress());
+			}
+		} else {
+			sender = (Movable) event.getParameter("OBJECT");
+		}
+
+		if (sender == null) {
 			return;
-		}		
-		String direction = (String)(event.getParameter("DIR"));
+		}
+
+		String direction = (String) (event.getParameter("DIR"));
 
 		if (direction.equalsIgnoreCase("UP")) {
-			player.moveUp();
+			sender.moveUp();
 		} else if (direction.equalsIgnoreCase("DOWN")) {
-			player.moveDown();
+			sender.moveDown();
 		} else if (direction.equalsIgnoreCase("LEFT")) {
-			player.moveLeft();
+			sender.moveLeft();
 		} else if (direction.equalsIgnoreCase("RIGHT")) {
-			player.moveRight();
+			sender.moveRight();
 		}
-		
-	}
-
-	public Floor getGameFloor() {		
-		return gameFloor;
-	}
-
+	}	
+	
 	private boolean senderHasJoinedGame(NetworkAddress senderAddress) {
 		//Extract the sender player information from the packet and check if it has already joined the game
 		if(gameFloor.getPlayer(senderAddress)==null){
@@ -183,10 +217,6 @@ public class GameResolver extends Thread{
 		}
 		return false;
 	}
-	
-	public GameServer getGameServer() {		
-		return gameServer;
-	}	
 	
 	private boolean senderIsAllowed(GameEvent event){
 				
@@ -215,6 +245,92 @@ public class GameResolver extends Thread{
 
 	public void setGameIsRunning(boolean b) {
 		gameIsRunning = b;		
+	}
+
+	public void sendUpdateMessage(String updateMessage) {
+		if(gameServer==null){return;}
+		gameServer.sendUpdateMessage(gameFloor.getAddressOfAllPlayers(), updateMessage);		
+	}
+	
+	public void addEvent(GameEvent event) {
+		try {
+			gameEventQueue.put(event);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		};
+	}		
+	
+	@Override
+	public String processPacket(DatagramPacket packet) {		
+		if(packet!=null){			
+			GameEvent action = GameProtocol.getInstance().getEvent(packet);			
+			if(action == null){return null;}
+			
+						
+			if(action.getType() == GameEvent.Type.GAMECHANGE){
+				
+				String param = (String)(action.getParameter("CALL"));
+				
+				if(param.equalsIgnoreCase("JOIN")){
+					
+					String playerName = gameFloor.addPlayer(new NetworkAddress(packet.getSocketAddress()));
+					if(playerName!=null){
+						System.out.println(playerName+ " Joined");	
+						return playerName;
+					}  
+					
+				}else if(param.equalsIgnoreCase("START")){					
+					if(gameFloor.getHostPlayer().getAddress().equals(action.getSenderAddress())){
+						setGameIsRunning(true);		
+						gameServer.setGameStarted(true);
+					}					
+				}				
+			}
+						
+		}		
+		return null;
+	}
+
+
+	public ArrayBlockingQueue<GameStateUpdate> getGameStateUpdateQueue() {
+		// TODO Auto-generated method stub
+		return gameStateUpdateQueue;
+	}
+
+
+	public void addUpdate(GameStateUpdate update) {
+		try {
+			gameStateUpdateQueue.put(update);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+	
+	public GameStateUpdate getUpdate() {
+		return gameStateUpdateQueue.poll();
+	}
+
+
+	public GameStateUpdate getFloorState() {
+		return GameStateUpdate.makeFullUpdateFor(gameFloor);
+	}
+	
+	public int getFloorX(){
+		return gameFloor.getXSize();
+	}
+	public int getFloorY(){
+		return gameFloor.getYSize();
+	}
+	
+	public void addPlayerToFloor(NetworkAddress playerAddress,int x, int y){
+		gameFloor.addPlayer(playerAddress, x, y);
+	}
+
+
+	public Player getPlayer(String string) {
+		return gameFloor.getPlayer(string);
 	}
 	
 	

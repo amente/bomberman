@@ -173,7 +173,7 @@ public class NetworkManager {
 		
 		try {
 			socket.receive(packet);			
-			String ackMessage  = p.process(packet);
+			String ackMessage  = p.processPacket(packet);
 			
 			if(ackMessage!=null){
 				

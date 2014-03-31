@@ -5,20 +5,18 @@ import org.newdawn.slick.SlickException;
 
 
 
-public class GUIBomb implements GUIObject{
+public class GUIBomb extends GUIObject{
 	
 	
 	//private Animation explosionAnimation;
 	private Image exploded;
 	private Image unexploded;
 	private Image image;
-	private String id;
-	private int x,y ;			
-	private boolean redraw = true;
+	private String id;		
+	
 	public int explodeTimout = 100;
 	private boolean explode = false;
-	private boolean loaded = false;
-	
+		
 	
 	public GUIBomb(String id,int xPos,int yPos) throws SlickException{			
 		this.id = id;
@@ -31,10 +29,7 @@ public class GUIBomb implements GUIObject{
 	public void redraw() throws SlickException{
 		// TODO: Look for a better solution than checking loaded 
 		if(!redraw  ){return;}		
-		if(!loaded){
-			loadImages();
-			loaded = true;
-		}
+		checkAndloadImage();
 		image.draw(64f*x ,52f*y );
 		if(explode){
 			if(explodeTimout==0){
@@ -62,6 +57,23 @@ public class GUIBomb implements GUIObject{
 		image = exploded;
 		explode = true;
 		System.out.println("Exploded Bomb");
+	}
+
+
+	@Override
+	public Image getImage() {
+		return image;		
+	}
+
+
+	@Override
+	public void loadImage() {
+		try {
+			loadImages();
+		} catch (SlickException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }

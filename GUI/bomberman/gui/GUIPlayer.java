@@ -6,13 +6,11 @@ import org.newdawn.slick.SlickException;
 
 import bomberman.game.floor.Movable.MovementType;
 
-public class GUIPlayer implements GUIObject{
+public class GUIPlayer extends GUIObject{
 	
 	private Animation sprite,up,down,left,right;
 	private String name;
-	private int x,y ;	
-	private boolean loaded = false;
-	private boolean redraw = true;
+	
 	
 	public GUIPlayer(String name,int xPos,int yPos) throws SlickException{			
 		this.name = name;
@@ -75,5 +73,19 @@ public class GUIPlayer implements GUIObject{
 	public void setRedraw(boolean b) {
 		// TODO Auto-generated method stub
 		redraw = b;
+	}
+
+
+	@Override
+	public Image getImage() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void loadImage() {
+		// TODO Auto-generated method stub
+		
 	}		
 }

@@ -2,7 +2,6 @@ package bomberman.test;
 
 import static org.junit.Assert.fail;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import bomberman.game.GameResolver;
@@ -29,12 +28,12 @@ public class TestPlayerFactory {
 		if (address == null) { fail(); }
 		
 		if (initialX == -1) {
-			initialX = resolver.getGameFloor().getXSize() - 2;
-			initialY = resolver.getGameFloor().getYSize() - 2;
+			initialX = resolver.getFloorX() - 2;
+			initialY = resolver.getFloorY() - 2;
 		}
 		
-		resolver.getGameFloor().addPlayer(address, initialX, initialY);
-		Player player = resolver.getGameFloor().getPlayer("Player" + playerNum++);
+		resolver.addPlayerToFloor(address, initialX, initialY);
+		Player player = resolver.getPlayer("Player" + playerNum++);
 		if (player == null) { fail(); }
 		
 		return player;

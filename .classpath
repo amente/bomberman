@@ -11,7 +11,7 @@
 	<classpathentry kind="lib" path="Lib/lwjgl-2.9.1"/>
 	<classpathentry kind="lib" path="Lib/lwjgl.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Bomberman/Lib/lwjgl-2.9.1/native/linux"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Bomberman/Lib/lwjgl-2.9.1/native/windows"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>

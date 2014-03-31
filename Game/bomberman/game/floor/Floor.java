@@ -5,9 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
@@ -42,9 +40,7 @@ public class Floor {
 	private Player hostPlayer;
 	private ArrayList<Tile> emptyTiles = new ArrayList<Tile>() ;
 	private GameResolver gameResolver;
-	
-    private ArrayBlockingQueue<GameStateUpdate> gameStateUpdateQueue;
-	
+	  
 	private Tile[][] tiles;
 	private TiledMap map;
 	private int xSize;
@@ -57,8 +53,7 @@ public class Floor {
 		this(gameResolver, false);
 	}
 	
-	public Floor(GameResolver gameResolver, boolean isTest){	
-		gameStateUpdateQueue = new ArrayBlockingQueue<GameStateUpdate>(500,true);
+	public Floor(GameResolver gameResolver, boolean isTest){		
 		this.gameResolver = gameResolver;
 		if (!isTest) {
 			initialize();
@@ -225,7 +220,7 @@ public class Floor {
 		event.setType(GameEvent.Type.KILL);
 		event.addParameter("PLAYER",p);	
 		event.setIsFromPlayer(false);
-		gameResolver.getGameServer().addEvent(event);
+		gameResolver.addEvent(event);
 	}
 
 	public void givePowerUp(Player player) {	
@@ -250,13 +245,8 @@ public class Floor {
 
 	
 	
-	private void addUpdate(GameStateUpdate makeUpdateForMove) {
-		try {
-			gameStateUpdateQueue.put(makeUpdateForMove);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
+	private void addUpdate(GameStateUpdate makeUpdateForMove) {		
+		gameResolver.addUpdate(makeUpdateForMove);		
 		addedUpdates++;
 		System.out.println("Added Updates: "+addedUpdates);
 	}
@@ -317,13 +307,7 @@ public class Floor {
 			}
 		}		
 			
-	}	
-		
-	public ArrayBlockingQueue<GameStateUpdate> getGameStateUpdateQueue(){
-		return gameStateUpdateQueue;
 	}
-	
-	
 	public int getEnemyCount(){
 		return enemies.size();
 	}
@@ -377,7 +361,7 @@ public class Floor {
                  int tileID = map.getTileId(xAxis, yAxis, 0);
                  String value = map.getTileProperty(tileID, "type", "none");                 
 
- 				if(value.equalsIgnoreCase("brick")){					
+ 				if(value.equalsIgnoreCase("box")){					
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Box(this)); 					
  				}else if(value.equalsIgnoreCase("door")){
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,new Door(this));					
@@ -387,9 +371,15 @@ public class Floor {
  					Enemy enemy = new Enemy(this);
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,enemy);
  					enemies.add(enemy);
+ 				}else if(value.equalsIgnoreCase("powerup")){
+ 					PowerUp powerup = new PowerUp(this);
+ 					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,powerup); 					
  				}else if(value.equalsIgnoreCase("empty")){
  					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,null);
  					emptyTiles.add(tiles[xAxis][yAxis]);					
+ 				}else{
+ 					tiles[xAxis][yAxis] = new Tile(xAxis,yAxis,null);
+ 					emptyTiles.add(tiles[xAxis][yAxis]);
  				}
                  
              }  
@@ -405,7 +395,7 @@ public class Floor {
 		
 		StringBuilder state = new StringBuilder();
 		for (Tile[] yGrid : tiles){
-			for(Tile l: yGrid){
+			for(Tile l: yGrid){				
 				state.append(l.getObject()==null?EMPTYNAME:l.getObject().getName());
 				state.append("|");
 			}

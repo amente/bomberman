@@ -8,5 +8,5 @@ import java.net.DatagramPacket;
  *
  */
 public interface PacketProcessor {
-		public String process(DatagramPacket packet);
+		public String processPacket(DatagramPacket packet);
 }

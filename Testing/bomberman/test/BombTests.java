@@ -1,15 +1,9 @@
 package bomberman.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import bomberman.game.GameEvent;
-import bomberman.game.GameProtocol;
-import bomberman.game.GameResolver;
-import bomberman.game.floor.Player;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import bomberman.game.GameResolver;
 
 public class BombTests {
 	
@@ -18,7 +12,7 @@ public class BombTests {
 		IGameStateAssertion preAssertion = new IGameStateAssertion() {
 			@Override
 			public void AssertState(GameResolver r) {
-				boolean b = r.getGameFloor().getPlayer("Player2").isAlive();
+				boolean b = r.getPlayer("Player2").isAlive();
 				Assert.assertTrue(b);
 			}
 		};
@@ -26,7 +20,7 @@ public class BombTests {
 		IGameStateAssertion postAssertion = new IGameStateAssertion() {
 			@Override
 			public void AssertState(GameResolver r) {
-				boolean b = r.getGameFloor().getPlayer("Player2").isAlive();
+				boolean b = r.getPlayer("Player2").isAlive();
 				Assert.assertFalse(b);
 			}
 		};
@@ -47,7 +41,7 @@ public class BombTests {
 		IGameStateAssertion preAssertion = new IGameStateAssertion() {
 			@Override
 			public void AssertState(GameResolver r) {
-				boolean b = r.getGameFloor().getPlayer("Player2").isAlive();
+				boolean b = r.getPlayer("Player2").isAlive();
 				Assert.assertTrue(b);
 			}
 		};
@@ -55,7 +49,7 @@ public class BombTests {
 		IGameStateAssertion postAssertion = new IGameStateAssertion() {
 			@Override
 			public void AssertState(GameResolver r) {
-				boolean b = r.getGameFloor().getPlayer("Player2").isAlive();
+				boolean b = r.getPlayer("Player2").isAlive();
 				Assert.assertTrue(b);
 			}
 		};

@@ -22,10 +22,15 @@
     <property name="type" value="brick"/>
    </properties>
   </tile>
+  <tile id="5">
+   <properties>
+    <property name="type" value="powerup"/>
+   </properties>
+  </tile>
  </tileset>
  <layer name="Tile Layer 1" width="15" height="15">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC2NkYGBgpACzkIGR9bIiYWL46PayorFJ0Uuum1lw2IPuHnL0MhPhX1x6WdHsp1UcYQtvWoQzrvjEZjc19ZLrZnIxACvHhqqEAwAA
+   H4sIAAAAAAAAC2NkYGBgpACzkIjZ0PSyImFi+Oj2sqKxSdFLCsZmL7o96O4hRy8zEf7FpZcVzX5q+Reb2ejixIYzGwX24vIvNnsp0UtuWJGLAZfeeH2EAwAA
   </data>
  </layer>
 </map>

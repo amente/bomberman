@@ -15,8 +15,12 @@ import bomberman.game.GameStateReciever;
 import bomberman.game.GameStateUpdate;
 import bomberman.game.floor.Movable.MovementType;
 import bomberman.gui.GUIBomb;
+import bomberman.gui.GUIBox;
 import bomberman.gui.GUIObject;
 import bomberman.gui.GUIPlayer;
+import bomberman.gui.GUIPowerUp;
+import bomberman.gui.GUITile;
+import bomberman.gui.GUIWall;
 
 /**
  * 
@@ -155,7 +159,47 @@ public class TestSpectator extends BasicGame{
 		   // System.out.println("Explode bomb "+name);
 			((GUIBomb) objects.get(name)).setExplode(true);
 			
-		}  
+		}else if(update.getType().equals(GameStateUpdate.UpdateType.FULL)){
+			
+			/*
+			String state = update.getParameter("STATE");
+			int y = 0,x;
+			String[] rows = state.split("\n");			
+			for(String row: rows){
+				y++;
+				System.out.println("Test");
+				System.out.println(row);
+				String[] cols = row.split("|");
+				x = 0;
+				for(String col: cols){
+					x++;
+					if(col.equalsIgnoreCase("_")){
+						GUITile tile = new GUITile();
+						tile.setX(x);
+						tile.setY(y);
+						objects.put("tile"+tile.hashCode(), tile);
+					}else if(col.equalsIgnoreCase("Box")){
+						GUIBox box = new GUIBox();
+						box.setX(x);
+						box.setY(y);
+						objects.put("box"+box.hashCode(),box);
+					}else if(col.equalsIgnoreCase("PowerUp")){
+						GUIPowerUp powerUp = new GUIPowerUp();
+						powerUp.setX(x);
+						powerUp.setY(y);
+						objects.put("powerup"+powerUp.hashCode(),powerUp);
+					}else if(col.equalsIgnoreCase("Wall")){
+						GUIWall wall = new GUIWall();
+						wall.setX(x);
+						wall.setY(y);
+						objects.put("wall"+wall.hashCode(),wall);
+					}
+					
+				}				
+			}			
+			
+			*/
+		}
 
 
 		}		
