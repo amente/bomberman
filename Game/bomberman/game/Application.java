@@ -2,6 +2,8 @@ package bomberman.game;
 
 import java.io.IOException;
 
+import bomberman.gui.Game;
+
 public class Application {
 	
 	public static final int QUEUE_CAPACITY = 500;
@@ -16,6 +18,23 @@ public class Application {
 	
 	static boolean gameRunning = false;
 	
+		
+	public static GameResolver startServer(int listenPort) {		
+		GameResolver gameResolver = new GameResolver(listenPort);		
+		gameResolver.start();
+		return gameResolver;			
+	}
+
+
+	public static GameClient startClient(String serverAddress,int serverPort) {		
+		GameClient client = new GameClient(serverPort,serverAddress);
+		Game game = new Game(client);
+		game.start();
+		return client;
+	}
+
+	
+	
 	public static void main(String args[]) throws IOException{
 		
 		if(args.length<1){
@@ -23,10 +42,8 @@ public class Application {
 		}
 		
 		int listenPort = Integer.parseInt(args[0]);							
-		
-				
-		GameResolver gameResolver = new GameResolver(listenPort);		
-		gameResolver.start();	    	    
+		startServer(listenPort);
+		    	    
 					
 	}	
 	

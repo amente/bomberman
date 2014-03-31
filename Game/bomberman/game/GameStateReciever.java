@@ -21,11 +21,11 @@ public class GameStateReciever extends Thread {
 	@Override
 	public void run(){
 		if(manager == null){return;}
+		System.out.println("Game State Update reciever Started!");		
 		
-		while(!this.isInterrupted()){
+		while(!this.isInterrupted()){			
 			DatagramPacket packet = manager.receiveAsynchronous(10, true);
-			if(packet!=null){
-				//System.out.println(playerName+" Recieved Updates:");
+			if(packet!=null){				
 				String message = new String(packet.getData(),packet.getOffset(),packet.getLength());
 				System.out.println(message);
 				try {
