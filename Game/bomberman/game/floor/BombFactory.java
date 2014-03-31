@@ -22,7 +22,7 @@ public class BombFactory {
 			allowedBombPerPlayer.put(playerName, DEFAULT_LIMIT_PER_PLAYER);
 		}
 		
-		int currentLimit = allowedBombPerPlayer.get(playerName);
+		Integer currentLimit = allowedBombPerPlayer.get(playerName);
 		
 		if (currentLimit > 0) {
 			Bomb bomb = new Bomb(floor);
@@ -53,9 +53,8 @@ public class BombFactory {
 	public void increaseLimit(Player player){
 		String playerName = player.getName();
 		if(!allowedBombPerPlayer.containsKey(playerName)){
-			allowedBombPerPlayer.put(playerName,1);
-		} else {
-			allowedBombPerPlayer.put(playerName, allowedBombPerPlayer.get(playerName) + 1);
+			Integer curLimit = allowedBombPerPlayer.get(playerName);
+			allowedBombPerPlayer.put(playerName,(curLimit == null)? 1:curLimit +1);
 		}
 	}
 }
