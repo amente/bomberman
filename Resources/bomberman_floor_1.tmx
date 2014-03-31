@@ -19,7 +19,7 @@
   </tile>
   <tile id="4">
    <properties>
-    <property name="type" value="brick"/>
+    <property name="type" value="box"/>
    </properties>
   </tile>
   <tile id="5">

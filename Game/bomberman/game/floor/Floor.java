@@ -394,13 +394,24 @@ public class Floor {
 	public String getState(){
 		
 		StringBuilder state = new StringBuilder();
+		
+		for(int y = 0;y<tiles.length;y++){			
+			for(int x=0;x<tiles.length;x++){
+				Tile l = tiles[x][y];
+				state.append(l.getObject()==null?EMPTYNAME:l.getObject().getName());
+				state.append("|");
+			}
+			state.append("\n");
+		}
+		
+		/*
 		for (Tile[] yGrid : tiles){
 			for(Tile l: yGrid){				
 				state.append(l.getObject()==null?EMPTYNAME:l.getObject().getName());
 				state.append("|");
 			}
 			state.append("\n");
-		}
+		}*/
 		return state.toString();
 	}
 	
