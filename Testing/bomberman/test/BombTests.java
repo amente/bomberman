@@ -56,7 +56,7 @@ public class BombTests {
 		
 		ThreadedTestRunner.RunGameTest(
 			new String[] { "Bomb" }, 3, 3,
-			new String[] { "Move UP"}, 4, 3,
+			new String[] { "Move DOWN"}, 4, 3,
 			preAssertion, postAssertion,
 			2500
 		);

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -12,9 +13,13 @@ import java.util.ArrayList;
  *
  */
 public class TestDriver {
-	
+	public static List<Tuple<String, Double>> latencies = new ArrayList<Tuple<String, Double>>();
 	
 	public static void main(String args[]) {
+		RunTest(args, false, 500);
+	}
+	
+	public static void RunTest(String args[], boolean performanceTest, int timeout) {
 		if (args.length != 3) {
 			System.out.println("usage: java TestDriver <serverAddress> <serverPort> <testFilePath>");
 			System.exit(1);
@@ -59,7 +64,7 @@ public class TestDriver {
 		// Send Join Messages to the server for each player		
 		for(int i=0;i<numPlayers;i++){
 			
-			TestPlayer player = new TestPlayer(playerCommands.get(i),serverPort,serverAddress);
+			TestPlayer player = new TestPlayer(playerCommands.get(i),serverPort,serverAddress, timeout);
 			
 			String playerID = player.sendJoin();
 			if(playerID != null){
@@ -68,9 +73,8 @@ public class TestDriver {
 			}else{
 				System.out.println("player joining game failed");
 			}
-			
 			try {
-				Thread.sleep(500);
+				Thread.sleep(timeout);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -107,13 +111,16 @@ public class TestDriver {
 		
 		//Join The GUI Thread
 		
-		try {
+		/*try {
 			guiThread.join();
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		}*/
+		
+		if(performanceTest) {
+			guiThread.interrupt();
 		}
-
 		
 		try {
 			Thread.sleep(2000);
@@ -121,6 +128,8 @@ public class TestDriver {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		
 		
 	}
 }

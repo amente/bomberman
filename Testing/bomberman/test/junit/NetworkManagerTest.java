@@ -12,7 +12,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import bomberman.game.JoinResolver;
 import bomberman.game.network.NetworkAddress;
 import bomberman.game.network.NetworkManager;
 import bomberman.game.network.PacketProcessor;
@@ -25,23 +24,13 @@ public class NetworkManagerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		try { manager = new NetworkManager(6000); } catch (SocketException e) { fail(); }
-		try { address = new NetworkAddress("127.0.0.1", 6000); } catch (UnknownHostException e) { fail(); }
+		try { manager = new NetworkManager(5000); } catch (SocketException e) { fail(); }
+		try { address = new NetworkAddress("127.0.0.1", 5000); } catch (UnknownHostException e) { fail(); }
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		manager.close();
-	}
-
-	@Test
-	public void testNetworkManager() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testNetworkManagerInt() {
-		fail("Not yet implemented");
 	}
 
 	@Test
@@ -83,50 +72,4 @@ public class NetworkManagerTest {
 		
 		ThreadedTestRunner.RunTests(runnables, true);
 	}
-
-	@Test
-	public void testReceiveAsynchronous() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testReceiveSynchronousIntIntBooleanPacketProcessor() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testReceiveSynchronousStringIntIntBoolean() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testClose() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetSendCount() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetReceiveCount() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetSendCount() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetReceiveCount() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testMakeDatagramPacket() {
-		fail("Not yet implemented");
-	}
-
 }

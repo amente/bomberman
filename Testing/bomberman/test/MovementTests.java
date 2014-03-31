@@ -51,9 +51,6 @@ public class MovementTests {
 				Player p2 = r.getPlayer("Player2");
 				Assert.assertEquals(p1.getX(), 2);
 				Assert.assertEquals(p1.getY(), 3);
-				
-				Assert.assertEquals(p2.getX(), 6);
-				Assert.assertEquals(p2.getY(), 5);
 			}
 		};
 		
@@ -61,7 +58,7 @@ public class MovementTests {
 			new String[] { "Move DOWN" },
 			2,
 			2, 
-			new String[] { "Move RIGHT" }, 
+			new String[] {}, 
 			5, 
 			5, 
 			null, 
@@ -82,12 +79,12 @@ public class MovementTests {
 		};
 		
 		ThreadedTestRunner.RunGameTest(
-			new String[] { "Move RIGHT" },
+			new String[] { "Move DOWN" },
 			2,
 			2, 
 			new String[] {}, 
-			3, 
 			2, 
+			3, 
 			null, 
 			postAssertion, 
 			100

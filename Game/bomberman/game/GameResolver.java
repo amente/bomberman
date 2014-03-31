@@ -190,7 +190,7 @@ public class GameResolver extends Thread implements PacketProcessor{
 		}
 
 		String direction = (String) (event.getParameter("DIR"));
-
+		
 		if (direction.equalsIgnoreCase("UP")) {
 			sender.moveUp();
 		} else if (direction.equalsIgnoreCase("DOWN")) {

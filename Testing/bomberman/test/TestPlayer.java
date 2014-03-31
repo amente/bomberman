@@ -18,9 +18,10 @@ public class TestPlayer extends Thread{
 	private NetworkAddress serverAddress;
 	private ArrayList<String> commands;
 	String playerName ;		
+	int timeout = 200;
 	
 			
-	TestPlayer(ArrayList<String> commands,int serverPort,String serverAddress){
+	TestPlayer(ArrayList<String> commands,int serverPort,String serverAddress, int timeout){
 		try {
 		    this.commands = commands;
 		    networkManager = new NetworkManager();
@@ -47,8 +48,8 @@ public class TestPlayer extends Thread{
 		
 		// Send game commands
 		for(String cmd: commands){
-			
 			String[] lineArr = cmd.split(" ");			
+		
 			if(lineArr[0].equalsIgnoreCase("Move")){						
 					System.out.println("Sending Move "+lineArr[1]);
 					networkManager.sendAsynchronous(cmd.trim(),serverAddress,true);					
@@ -56,8 +57,7 @@ public class TestPlayer extends Thread{
 				//System.out.println("Sending Bomb");
 				networkManager.sendAsynchronous(cmd.trim(),serverAddress,true);
 			}
-			
-
+		
 			try {
 				Thread.sleep(200);
 			} catch (InterruptedException e) {
@@ -67,7 +67,7 @@ public class TestPlayer extends Thread{
 		}
 		
 		
-		while(!isInterrupted());
+		//while(!isInterrupted());
 		
 		networkManager.close();
 	}

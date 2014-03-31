@@ -16,14 +16,5 @@ public class JoinResolverTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
-	public void testJoinResolver() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testProcess() {
-		fail("Not yet implemented");
-	}
 
 }
