@@ -1,6 +1,7 @@
 package bomberman.test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class PerformanceTests {
 		if (latencies.size() > 0) {
 			average_latency = average_latency / latencies.size();
 			
-			latencies.sort(new Comparator<Double>() {
+			Collections.sort(latencies,new Comparator<Double>() {
 				@Override
 				public int compare(Double a, Double b) {
 					if (a-b < 0) { return -1; }
