@@ -169,6 +169,22 @@ public class BufferTests implements Runnable {
 		}
 	}
 	
+	@Test
+	public void AssertSwitched() {
+		for (int i = 0; i < numTestRuns; i++){
+			RunMultipleThreadTest(
+				1,
+				1,
+				1001,
+				1001,
+				true,
+				true
+			);
+			
+			assertNotEquals(buffer.getConsumerBuffer(), buffer.getProducerBuffer());
+		}
+	}
+	
 	private void RunMultipleThreadTest(
 		int numProducers,
 		int numConsumers,
